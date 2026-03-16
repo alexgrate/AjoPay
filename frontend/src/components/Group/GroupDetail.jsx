@@ -627,6 +627,8 @@ const GroupDetail = () => {
     const isCreator = group?.creator === currentUser.id;
     const myMember  = members.find(m => m.user_id === currentUser.id);
 
+    usePageTitle(group?.name || "Group");
+
     const fetchGroup = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -778,7 +780,6 @@ const GroupDetail = () => {
     if (error)   return <ErrorScreen type={error} onRetry={fetchGroup} />;
     if (!group)  return null;
 
-    usePageTitle(group?.name || "Group");
 
     const creatorInitials = getInitials(group.creator_name || "");
     const fillPct         = Math.round((group.member_count / group.max_members) * 100);
