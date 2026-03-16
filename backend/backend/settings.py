@@ -73,7 +73,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = config("FRONTEND_URL", default="http://localhost:5173").split(",")
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://ajopay-1.onrender.com",
+    *[url.strip() for url in config("FRONTEND_URL", default="http://localhost:5173").split(",") if url.strip()],
+]
 
 
 AUTH_USER_MODEL = "accounts.CustomUser"
