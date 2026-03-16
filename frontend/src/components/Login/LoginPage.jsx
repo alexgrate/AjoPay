@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { Coins, User, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const MotionLink = motion.create(Link);
 
@@ -48,6 +49,8 @@ const LoginPage = () => {
     const [passwordFocused, setPasswordFocused] = useState(false);
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+
+    usePageTitle("Login");
 
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "-40px" });

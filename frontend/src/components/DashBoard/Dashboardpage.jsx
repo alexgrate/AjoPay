@@ -3,6 +3,7 @@ import { Coins, Users, Plus, ArrowRight, Clock, Timer, CircleDollarSign, Trophy,
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const MotionLink = motion.create(Link);
 
@@ -206,6 +207,9 @@ const Dashboardpage = () => {
     const [groups,       setGroups]       = useState([]);
     const [groupsLoading,setGroupsLoading]= useState(true);
     const [groupsError,  setGroupsError]  = useState(null);
+
+    usePageTitle("Dashboard");
+
 
     const fetchGroups = useCallback(async () => {
         setGroupsLoading(true);

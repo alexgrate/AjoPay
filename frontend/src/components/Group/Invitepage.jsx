@@ -8,6 +8,7 @@ import {
     Lock, Globe,
 } from "lucide-react";
 import AxiosInstance from "../AxiosInstance";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const CoinLoader = ({ onDone }) => {
     useEffect(() => {
@@ -434,6 +435,9 @@ const Invitepage = () => {
 
     const [group,      setGroup]      = useState(null);
     const [activeCode, setActiveCode] = useState(null); 
+    
+    usePageTitle("Join Group");
+
 
     const fetchGroup = async (code) => {
         setLookupLoading(true);

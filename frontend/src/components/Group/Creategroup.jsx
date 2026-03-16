@@ -8,6 +8,7 @@ import {
     Copy, AlertTriangle
 } from "lucide-react";
 import AxiosInstance from "../AxiosInstance";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const FloatingUser = ({ x, size, delay, dur }) => (
     <motion.div
@@ -175,6 +176,8 @@ export default function CreateGroup() {
     const [errors,       setErrors]       = useState({});
     const [createdGroup, setCreatedGroup] = useState(null);
     const [copied,       setCopied]       = useState(false);
+
+    usePageTitle("Create Group");
 
     const goNext = () => { setDir("forward"); setStep(s => s + 1); };
     const goBack = () => { setDir("back");    setStep(s => s - 1); };

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Users, Plus, LayoutGrid, Search, Calendar, ArrowRight, Coins, Globe, Lock, UserPlus, Check, Clock } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const MotionLink = motion.create(Link);
 
@@ -114,7 +115,6 @@ const GroupCard = ({ g, idx, mode = "member", onRequestJoin, requestState }) => 
                 <FillBar pct={fillPct} color={g.is_full ? "#e8634399" : accentColor} />
             </div>
 
-            {/* Footer */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #f4f0ea" }}>
                 <span style={{ fontSize: "0.78rem", color: "#2d3b1f80" }}>
                     By <strong style={{ color: "#2d3b1f" }}>{g.creator_name}</strong>
@@ -179,7 +179,6 @@ const GroupCard = ({ g, idx, mode = "member", onRequestJoin, requestState }) => 
     );
 };
 
-// ── Empty state ────────────────────────────────────────────────────────────────
 const EmptyState = ({ tab, query }) => {
     const isAvailable = tab === "available";
     const isFiltered  = query.length > 0;
@@ -213,7 +212,6 @@ const EmptyState = ({ tab, query }) => {
     );
 };
 
-// ── Error state ────────────────────────────────────────────────────────────────
 const ErrorState = ({ message, onRetry }) => (
     <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 20px" }}>
         <p style={{ color: "#e84343", fontWeight: 600, marginBottom: 12 }}>{message}</p>
@@ -224,7 +222,6 @@ const ErrorState = ({ message, onRetry }) => (
     </div>
 );
 
-// ── Loading spinner ────────────────────────────────────────────────────────────
 const Spinner = () => (
     <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "center", padding: "80px 20px" }}>
         <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
@@ -232,7 +229,6 @@ const Spinner = () => (
     </div>
 );
 
-// ── Main page ──────────────────────────────────────────────────────────────────
 const Groupspage = () => {
     const navigate = useNavigate();
 
@@ -240,23 +236,21 @@ const Groupspage = () => {
     const [query,        setQuery]        = useState("");
     const [searchFocused,setSearchFocused]= useState(false);
 
-    // My groups (all + my tabs)
     const [groups,      setGroups]      = useState([]);
     const [loading,     setLoading]     = useState(true);
     const [error,       setError]       = useState(null);
 
-    // Public groups (available tab)
     const [publicGroups,  setPublicGroups]  = useState([]);
     const [pubLoading,    setPubLoading]    = useState(false);
     const [pubError,      setPubError]      = useState(null);
-    const [pubFetched,    setPubFetched]    = useState(false);  // only fetch once until manual retry
+    const [pubFetched,    setPubFetched]    = useState(false); 
 
-    // Join request states — keyed by group id: undefined | "loading" | "sent" | "error"
+    usePageTitle("My Groups");
+
     const [requestStates, setRequestStates] = useState({});
 
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-    // ── Fetch my groups ──────────────────────────────────────────────────────
     const fetchGroups = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -270,7 +264,6 @@ const Groupspage = () => {
         }
     }, []);
 
-    // ── Fetch public groups ──────────────────────────────────────────────────
     const fetchPublicGroups = useCallback(async () => {
         setPubLoading(true);
         setPubError(null);
@@ -287,16 +280,13 @@ const Groupspage = () => {
 
     useEffect(() => { fetchGroups(); }, []);
 
-    // Fetch public groups the first time the available tab is opened
     useEffect(() => {
         if (activeTab === "available" && !pubFetched) {
             fetchPublicGroups();
         }
     }, [activeTab]);
 
-    // ── Send join request ────────────────────────────────────────────────────
     const handleRequestJoin = async (groupId) => {
-        // Block immediately if BVN not verified
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         if (!user.bvn_verified) {
             navigate("/verify-bvn");
@@ -310,7 +300,6 @@ const Groupspage = () => {
         } catch (err) {
             const msg = err.response?.data?.error || "";
 
-            // Already a member or already requested — treat as sent
             if (msg.includes("already")) {
                 setRequestStates(prev => ({ ...prev, [groupId]: "sent" }));
                 return;
@@ -321,7 +310,6 @@ const Groupspage = () => {
                 return;
             }
 
-            // Credit score too low but BVN already verified → show inline error
             if (msg.includes("credit score")) {
                 setRequestStates(prev => ({ ...prev, [groupId]: "credit_low" }));
                 return;
@@ -334,7 +322,6 @@ const Groupspage = () => {
         }
     };
 
-    // ── Filtering ────────────────────────────────────────────────────────────
     const applyQuery = (list) =>
         list.filter(g =>
             g.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -349,7 +336,6 @@ const Groupspage = () => {
         return applyQuery(groups);   // "all"
     })();
 
-    // ── Tab switch: reset query ───────────────────────────────────────────────
     const handleTabChange = (key) => {
         setActiveTab(key);
         setQuery("");
@@ -382,7 +368,6 @@ const Groupspage = () => {
                     </motion.div>
                 </div>
 
-                {/* Search bar */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} style={{ marginBottom: 20 }}>
                     <motion.div
                         animate={{ borderColor: searchFocused ? "#d4a843" : "#e8e2d8", boxShadow: searchFocused ? "0 0 0 3px rgba(212,168,67,0.12)" : "0 2px 12px rgba(0,0,0,0.05)" }}
@@ -409,12 +394,10 @@ const Groupspage = () => {
                     </motion.div>
                 </motion.div>
 
-                {/* Tabs */}
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.18 }}
                     style={{ background: "#fff", borderRadius: 16, padding: "6px", display: "flex", gap: 4, marginBottom: 32, border: "1.5px solid #f0ece4", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
                     {tabs.map(({ key, label, Icon }) => {
                         const active = activeTab === key;
-                        // Badge count for available tab
                         const showBadge = key === "available" && pubFetched && publicGroups.length > 0;
                         return (
                             <motion.button key={key} onClick={() => handleTabChange(key)} whileTap={{ scale: 0.97 }}
@@ -433,13 +416,11 @@ const Groupspage = () => {
                     })}
                 </motion.div>
 
-                {/* Available tab info banner */}
                 <AnimatePresence>
                     {activeTab === "available" && (
                         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                             style={{ marginBottom: 20 }}>
 
-                            {/* BVN warning if not verified */}
                             {!JSON.parse(localStorage.getItem("user") || "{}").bvn_verified && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                                     style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 14, padding: "12px 16px", marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -451,7 +432,6 @@ const Groupspage = () => {
                                 </motion.div>
                             )}
 
-                            {/* Standard info banner */}
                             <div style={{ background: "#f0fff4", border: "1.5px solid #b2dfcc", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 10 }}>
                                 <Globe size={15} color="#1a7a3a" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
                                 <p style={{ fontSize: "0.82rem", color: "#1a7a3a", lineHeight: 1.55 }}>
@@ -464,14 +444,12 @@ const Groupspage = () => {
                     )}
                 </AnimatePresence>
 
-                {/* Grid */}
                 <AnimatePresence mode="wait">
                     <motion.div key={activeTab + query}
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.25 }}
                         style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
 
-                        {/* ── All / My tabs ───────────────────────────────── */}
                         {(activeTab === "all" || activeTab === "my") && (
                             <>
                                 {loading && <Spinner />}
@@ -484,7 +462,6 @@ const Groupspage = () => {
                             </>
                         )}
 
-                        {/* ── Available tab ────────────────────────────────── */}
                         {activeTab === "available" && (
                             <>
                                 {pubLoading && <Spinner />}

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Coins, Home, ArrowLeft } from "lucide-react";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const floats = [
     { x: "5%",  size: 22, delay: 0,   dur: 5.2 },
@@ -22,6 +23,8 @@ const FloatCoin = ({ x, size, delay, dur }) => (
 );
 
 export default function NotFound() {
+    usePageTitle("Page Not Found");
+
     return (
         <div style={{ minHeight: "100vh", background: "#f5f0e8", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, position: "relative", overflow: "hidden" }}>
             {floats.map((c, i) => <FloatCoin key={i} {...c} />)}

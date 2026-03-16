@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import AxiosInstance from "../AxiosInstance";
 import { useLogout } from "../../hooks/useLogout";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const getInitials = (name = "") => {
     const parts = name.trim().split(" ").filter(Boolean);
@@ -247,6 +248,11 @@ export default function ProfilePage() {
 
     const [loginAlerts, setLoginAlerts] = useState(true);
     const [twoFA,       setTwoFA]       = useState(false);
+
+    
+    usePageTitle("Profile");
+
+
     const [notifs, setNotifs] = useState({
         paymentReminders: true, payoutAlerts: true, groupUpdates: true,
         txConfirm: true, marketing: false, sms: false,

@@ -6,8 +6,8 @@ import {
     ChevronRight, CheckCircle, XCircle, Coins,
 } from "lucide-react";
 import AxiosInstance from "../AxiosInstance";
+import usePageTitle from "../../hooks/usePageTitle";
 
-// ── Floating coins ─────────────────────────────────────────────────────────────
 const COINS = [
     { x: "4%",  d: 0,   dr: 5.2, s: 16 },
     { x: "15%", d: 1.8, dr: 4.6, s: 12 },
@@ -25,7 +25,6 @@ const FloatCoin = ({ x, d, dr, s }) => (
     </motion.div>
 );
 
-// ── Credit score ring ──────────────────────────────────────────────────────────
 const ScoreRing = ({ score }) => {
     const radius      = 54;
     const circumference = 2 * Math.PI * radius;
@@ -71,7 +70,6 @@ const ScoreRing = ({ score }) => {
     );
 };
 
-// ── Access level card ──────────────────────────────────────────────────────────
 const AccessRow = ({ label, allowed }) => (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #f4f0ea" }}>
         <span style={{ fontSize: "0.84rem", color: "#2d3b1f80" }}>{label}</span>
@@ -82,7 +80,6 @@ const AccessRow = ({ label, allowed }) => (
     </div>
 );
 
-// ── BVN input ──────────────────────────────────────────────────────────────────
 const BVNInput = ({ value, onChange, disabled }) => {
     const [focused, setFocused] = useState(false);
     return (
@@ -112,15 +109,16 @@ const BVNInput = ({ value, onChange, disabled }) => {
     );
 };
 
-// ── Main component ─────────────────────────────────────────────────────────────
 const BVNVerification = () => {
     const navigate = useNavigate();
 
     const [bvn,       setBvn]       = useState("");
     const [loading,   setLoading]   = useState(false);
     const [error,     setError]     = useState("");
-    const [result,    setResult]    = useState(null); // { credit_score, risk_level, access_level }
-    const [step,      setStep]      = useState("input"); // "input" | "verifying" | "result"
+    const [result,    setResult]    = useState(null); 
+    const [step,      setStep]      = useState("input"); 
+
+    usePageTitle("Verify BVN");
 
     const handleVerify = async () => {
         if (bvn.length !== 11) return setError("BVN must be exactly 11 digits");
@@ -133,7 +131,6 @@ const BVNVerification = () => {
         try {
             const res = await AxiosInstance.post("api/accounts/verify-bvn/", { bvn });
 
-            // Update user in localStorage with new data
             const stored = JSON.parse(localStorage.getItem("user") || "{}");
             const updated = { ...stored, ...res.data.user };
             localStorage.setItem("user", JSON.stringify(updated));
@@ -170,7 +167,6 @@ const BVNVerification = () => {
                 transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                 style={{ background: "#fff", borderRadius: 28, padding: "44px 36px 36px", width: "100%", maxWidth: 460, position: "relative", zIndex: 1, boxShadow: "0 8px 60px rgba(0,0,0,0.10)" }}>
 
-                {/* Logo */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, marginBottom: 28 }}>
                     <motion.div
                         animate={{ rotate: 360 }}
@@ -179,13 +175,12 @@ const BVNVerification = () => {
                         <Coins size={20} color="#fff" strokeWidth={1.8} />
                     </motion.div>
                     <span style={{ fontSize: "1.2rem", fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>
-                        <span style={{ color: "#2d3b1f" }}>Ajo</span><span style={{ color: "#d4a843" }}>Flow</span>
+                        <span style={{ color: "#2d3b1f" }}>Ajo</span><span style={{ color: "#d4a843" }}>Pay</span>
                     </span>
                 </div>
 
                 <AnimatePresence mode="wait">
 
-                    {/* ── INPUT STEP ─────────────────────────────────────── */}
                     {step === "input" && (
                         <motion.div key="input" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.3 }}>
 
@@ -200,7 +195,6 @@ const BVNVerification = () => {
                                 Your BVN is used to verify your identity and determine your group access level. It is never shared with other members.
                             </p>
 
-                            {/* Info box */}
                             <div style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 13, padding: "12px 14px", marginBottom: 22, display: "flex", gap: 10 }}>
                                 <AlertTriangle size={16} color="#d4a843" strokeWidth={2} style={{ flexShrink: 0, marginTop: 2 }} />
                                 <p style={{ fontSize: "0.8rem", color: "#8a6a00", lineHeight: 1.6 }}>
@@ -240,7 +234,6 @@ const BVNVerification = () => {
                         </motion.div>
                     )}
 
-                    {/* ── VERIFYING STEP ─────────────────────────────────── */}
                     {step === "verifying" && (
                         <motion.div key="verifying" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
                             style={{ textAlign: "center", padding: "20px 0" }}>
@@ -274,7 +267,6 @@ const BVNVerification = () => {
                         </motion.div>
                     )}
 
-                    {/* ── RESULT STEP ────────────────────────────────────── */}
                     {step === "result" && result && (
                         <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
 
@@ -303,7 +295,6 @@ const BVNVerification = () => {
                                 </motion.div>
                             </div>
 
-                            {/* Access level */}
                             {accessLevel && (
                                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
                                     style={{ background: "#f8f6f0", borderRadius: 14, padding: "16px", marginBottom: 18 }}>

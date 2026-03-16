@@ -11,6 +11,7 @@ import {
     TrendingUp, ArrowBigRight
 } from "lucide-react";
 import AxiosInstance from "../AxiosInstance";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const MotionLink = motion.create(Link);
 
@@ -618,6 +619,7 @@ const GroupDetail = () => {
     const [startingGroup,   setStartingGroup]   = useState(false);
     const [restartingGroup, setRestartingGroup] = useState(false);
 
+
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
     const members   = group?.members || [];
@@ -775,6 +777,8 @@ const GroupDetail = () => {
     if (loading) return <LoadingScreen />;
     if (error)   return <ErrorScreen type={error} onRetry={fetchGroup} />;
     if (!group)  return null;
+
+    usePageTitle(group?.name || "Group");
 
     const creatorInitials = getInitials(group.creator_name || "");
     const fillPct         = Math.round((group.member_count / group.max_members) * 100);

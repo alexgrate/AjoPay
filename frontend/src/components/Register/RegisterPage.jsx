@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion"
 import { Coins, User, Mail, Phone, Lock, UserPlus, ShieldCheck, Users, Bell, Headphones } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom"
 import AxiosInstance from '../AxiosInstance';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const features = [
     { icon: ShieldCheck, label: "Bank-level security with Paystack" },
@@ -53,6 +54,7 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
 
+    usePageTitle("Create Account");
 
     const [form, setForm] = useState({ 
         name: "", 

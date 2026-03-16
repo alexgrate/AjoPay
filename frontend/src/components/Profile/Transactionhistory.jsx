@@ -5,6 +5,7 @@ import {
     Coins, TrendingUp, TrendingDown, Clock, XCircle,
     Download, Users, Tag, CalendarDays, Wallet,
 } from "lucide-react";
+import usePageTitle from "../../hooks/usePageTitle";
 
 
 const TRANSACTIONS = [
@@ -762,6 +763,9 @@ const Transactionhistory = () => {
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchFocused, setSearchFocused] = useState(false);
     const [selectedTx,   setSelectedTx]  = useState(null);
+
+    usePageTitle("Transaction History");
+
 
     const filtered = useMemo(() => {
         return TRANSACTIONS.filter((tx) => {
