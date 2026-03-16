@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Bell } from 'lucide-react';
+import { useNavigate } from "react-router-dom"
 
 const dots = [
     { x: "8%",  size: 7,  delay: 0,    duration: 4.2, startY: "75%" },
@@ -51,7 +52,12 @@ const FloatingDot = ({ x, size, delay, duration, startY }) => (
 const Ctasection = () => {
     const ref = useRef(null)
     const inView = useInView(ref, { once: true, margin: "-80px" })
+    const navigate = useNavigate()
+    const isLoggedIn = !!localStorage.getItem("access_token")
 
+    const handleStartGroup = () => {
+        navigate(isLoggedIn ? "/create-group" : "/register")
+    }
 
     return (
         <section
@@ -135,6 +141,7 @@ const Ctasection = () => {
                     style={{ marginBottom: 28 }}
                 >
                     <motion.button
+                        onClick={handleStartGroup}
                         whileHover={{ scale: 1.05, backgroundColor: "#e8bc50" }}
                         whileTap={{ scale: 0.97 }}
                         style={{

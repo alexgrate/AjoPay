@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from "framer-motion"
 import { Circle, BadgeCheck, HeartPlus, Users, ShieldCheck, CircleDollarSign, Smile } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const MotionCircle = motion.create(Circle)
 
@@ -126,6 +127,16 @@ const HexViz = () => {
 const HeroSection = () => {
     const ref = useRef(null)
     const inView = useInView(ref, { once: true, margin: "-80px" })
+    const navigate = useNavigate()
+    const isLoggedIn = !!localStorage.getItem("access_token")
+
+    const handleStartGroup = () => {
+        navigate(isLoggedIn ? "/create-group" : "/register")
+    }
+
+    const handleJoinGroup = () => {
+        navigate(isLoggedIn ? "/groups" : "/register")
+    }
 
     const fadeUp = (delay = 0) => ({
         initial: { opacity: 0, y: 36 },
@@ -425,6 +436,7 @@ const HeroSection = () => {
                         style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 48 }}
                     >
                         <motion.button
+                            onClick={handleStartGroup}
                             whileHover={{ scale: 1.04, backgroundColor: "#C49A35" }}
                             whileTap={{ scale: 0.97 }}
                             style={{
@@ -446,6 +458,7 @@ const HeroSection = () => {
                         </motion.button>
 
                         <motion.button
+                            onClick={handleJoinGroup}
                             whileHover={{ scale: 1.04, background: "#2d3b1f1a" }}
                             whileTap={{ scale: 0.97 }}
                             style={{
