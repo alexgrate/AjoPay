@@ -58,7 +58,6 @@ def create_cycle(group, cycle_number, due_date):
         for member in active_members
     ])
 
-    # Debt records for suspended members
     suspended_members = Membership.objects.filter(
         group=group, is_suspended=True,
     )

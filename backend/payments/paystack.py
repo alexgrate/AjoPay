@@ -71,3 +71,14 @@ def get_banks():
         headers=HEADERS,
     )
     return res.json()
+
+def resolve_account(account_number, bank_code):
+    res = requests.get(
+        f"{PAYSTACK_BASE}/bank/resolve",
+        params={
+            "account_number": account_number,
+            "bank_code":      bank_code,
+        },
+        headers=HEADERS,
+    )
+    return res.json()

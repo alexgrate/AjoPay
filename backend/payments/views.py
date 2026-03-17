@@ -93,6 +93,7 @@ class InitializeContributionView(APIView):
             )
 
         callback = request.data.get("callback_url", "")
+        PLATFORM_FEE = 250
 
         pay_ref = PaymentReference.objects.create(
             user         = request.user,
@@ -102,9 +103,10 @@ class InitializeContributionView(APIView):
             contribution = contribution,
         )
 
+
         result = initialize_transaction(
             email        = request.user.email,
-            amount_naira = float(contribution.amount),
+            amount_naira = float(contribution.amount) + PLATFORM_FEE,
             reference    = str(pay_ref.reference),
             metadata     = {
                 "payment_type":    "contribution",
@@ -351,3 +353,36 @@ class RetryPayoutView(APIView):
             )
 
         return Response({"message": message})
+    
+
+class ResolveAccountView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        account_number = request.query_params.get("account_number", "")
+        bank_code      = request.query_params.get("bank_code", "")
+
+        if not account_number or not bank_code:
+            return Response(
+                {"error": "account_number and bank_code are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if len(account_number) != 10:
+            return Response(
+                {"error": "Account number must be 10 digits"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from .paystack import resolve_account
+        result = resolve_account(account_number, bank_code)
+
+        if not result.get("status"):
+            return Response(
+                {"error": "Could not verify account. Check account number and bank."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response({
+            "account_name":   result["data"]["account_name"],
+            "account_number": result["data"]["account_number"],
+        })

@@ -5,6 +5,7 @@ from .views import (
     PaystackWebhookView,
     RetryPayoutView,
     GetBanksView,
+    ResolveAccountView,
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path("webhook/paystack/",                              PaystackWebhookView.as_view(),         name="paystack_webhook"),
     path("banks/",                                         GetBanksView.as_view(),                name="get_banks"),
     path("payout/<int:cycle_id>/retry/",                   RetryPayoutView.as_view(),             name="retry_payout"),
+    path("resolve-account/", ResolveAccountView.as_view(), name="resolve-account"),
 ]

@@ -214,6 +214,67 @@ const DeleteModal = ({ onConfirm, onCancel, loading, error }) => {
     );
 };
 
+const BankSelector = ({ value, onChange }) => {
+    const [banks,   setBanks]   = useState([]);
+    const [search,  setSearch]  = useState(value || "");
+    const [open,    setOpen]    = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchBanks = async () => {
+            setLoading(true);
+            try {
+                const res = await AxiosInstance.get("api/payments/banks/");
+                setBanks(res.data.banks || []);
+            } catch {}
+            finally { setLoading(false); }
+        };
+        fetchBanks();
+    }, []);
+
+    const filtered = banks.filter(b =>
+        b.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        <div style={{ position: "relative" }}>
+            <div style={{ border: "1.5px solid #e0dbd2", borderRadius: 12, padding: "11px 13px", background: "#fff", display: "flex", alignItems: "center", gap: 8 }}
+                onClick={() => setOpen(v => !v)}>
+                <input
+                    value={search}
+                    onChange={e => { setSearch(e.target.value); setOpen(true); }}
+                    placeholder="Search bank..."
+                    style={{ flex: 1, border: "none", outline: "none", fontSize: "0.92rem", color: "#2d3b1f", background: "transparent", fontFamily: "'DM Sans',sans-serif", cursor: "pointer" }}
+                />
+                <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronRight size={14} color="#2d3b1f60" style={{ transform: "rotate(90deg)" }} />
+                </motion.span>
+            </div>
+
+            <AnimatePresence>
+                {open && (
+                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                        style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#fff", borderRadius: 12, border: "1.5px solid #e0dbd2", boxShadow: "0 8px 28px rgba(0,0,0,0.12)", zIndex: 999, maxHeight: 220, overflowY: "auto" }}>
+                        {loading ? (
+                            <div style={{ padding: "16px", textAlign: "center", fontSize: "0.82rem", color: "#2d3b1f80" }}>Loading banks…</div>
+                        ) : filtered.length === 0 ? (
+                            <div style={{ padding: "16px", textAlign: "center", fontSize: "0.82rem", color: "#2d3b1f80" }}>No bank found</div>
+                        ) : filtered.map((bank, i) => (
+                            <div key={i}
+                                onClick={() => { onChange(bank.name, bank.code); setSearch(bank.name); setOpen(false); }}
+                                style={{ padding: "11px 14px", fontSize: "0.88rem", color: "#2d3b1f", cursor: "pointer", borderBottom: i < filtered.length - 1 ? "1px solid #f4f0ea" : "none" }}
+                                onMouseEnter={e => e.currentTarget.style.background = "#f8f6f0"}
+                                onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                                {bank.name}
+                            </div>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 
 
 export default function ProfilePage() {
@@ -249,6 +310,12 @@ export default function ProfilePage() {
 
     const [loginAlerts, setLoginAlerts] = useState(true);
     const [twoFA,       setTwoFA]       = useState(false);
+
+    const [bankCode,    setBankCode]    = useState("");
+    const [accVerified, setAccVerified] = useState(false);
+    const [resolving,   setResolving]   = useState(false);
+    const [resolveError,setResolveError]= useState("");
+    const [banks,       setBanks]       = useState([]);
 
     
     usePageTitle("Profile");
@@ -354,6 +421,24 @@ export default function ProfilePage() {
         }
         fetchStats()
     }, [])
+
+    const resolveAccount = async (accountNumber, bankCode) => {
+        setResolving(true);
+        setResolveError("");
+        try {
+            const res = await AxiosInstance.get("api/payments/resolve-account/", {
+                params: { account_number: accountNumber, bank_code: bankCode }
+            });
+            setAccName(res.data.account_name);
+            setAccVerified(true);
+        } catch (err) {
+            setResolveError("Account not found. Check number and bank.");
+            setAccVerified(false);
+            setAccName("");
+        } finally {
+            setResolving(false);
+        }
+    };
 
     const handleSave = async () => {
         setSaving(true);
@@ -555,12 +640,90 @@ export default function ProfilePage() {
                                                 <ProfileField icon={MapPin} label="Location"     value={location}  editing={editing} onChange={e => setLocation(e.target.value)} />
                                             </div>
 
+                                            {/* Bank Details */}
                                             <div style={{ borderTop: "1px solid #f4f0ea", paddingTop: 20, marginBottom: 16 }}>
-                                                <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "#2d3b1f", fontFamily: "'Fraunces',serif", marginBottom: 16 }}>Bank Details</h3>
+                                                <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "#2d3b1f", fontFamily: "'Fraunces',serif", marginBottom: 16 }}>
+                                                    Bank Details
+                                                </h3>
                                                 <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
-                                                    <ProfileField icon={Building2}  label="Bank Name"       value={bankName}  editing={editing} onChange={e => setBankName(e.target.value)} />
-                                                    <ProfileField icon={CreditCard}  label="Account Number" value={accNumber} editing={editing} onChange={e => setAccNumber(e.target.value)} />
-                                                    <ProfileField icon={User}        label="Account Name"   value={accName}   editing={editing} onChange={e => setAccName(e.target.value)} />
+
+                                                    {/* Bank selector */}
+                                                    <div>
+                                                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                                                            <Building2 size={13} color="#7c5cbf" strokeWidth={2} />
+                                                            <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#2d3b1f80" }}>Bank Name</span>
+                                                        </div>
+                                                        {editing ? (
+                                                            <BankSelector
+                                                                value={bankName}
+                                                                onChange={(name, code) => {
+                                                                    setBankName(name);
+                                                                    setBankCode(code);
+                                                                    setAccName("");
+                                                                    setAccVerified(false);
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <div style={{ border: "1.5px solid #e8e2d8", borderRadius: 12, padding: "11px 13px", background: "#fff", fontSize: "0.92rem", color: "#2d3b1f" }}>
+                                                                {bankName || <span style={{ color: "#b8c0b0" }}>—</span>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Account number with auto-resolve */}
+                                                    <div>
+                                                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                                                            <CreditCard size={13} color="#7c5cbf" strokeWidth={2} />
+                                                            <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#2d3b1f80" }}>Account Number</span>
+                                                        </div>
+                                                        {editing ? (
+                                                            <div style={{ position: "relative" }}>
+                                                                <div style={{ border: `1.5px solid ${accVerified ? "#1db893" : "#e0dbd2"}`, borderRadius: 12, padding: "11px 13px", background: "#fff", display: "flex", alignItems: "center", gap: 8 }}>
+                                                                    <input
+                                                                        type="text"
+                                                                        inputMode="numeric"
+                                                                        maxLength={10}
+                                                                        value={accNumber}
+                                                                        onChange={e => {
+                                                                            const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                                                            setAccNumber(val);
+                                                                            setAccName("");
+                                                                            setAccVerified(false);
+                                                                            if (val.length === 10 && bankCode) {
+                                                                                resolveAccount(val, bankCode);
+                                                                            }
+                                                                        }}
+                                                                        placeholder="10-digit account number"
+                                                                        style={{ flex: 1, border: "none", outline: "none", fontSize: "0.92rem", color: "#2d3b1f", background: "transparent", fontFamily: "'DM Sans',sans-serif", letterSpacing: "0.08em" }}
+                                                                    />
+                                                                    {resolving && (
+                                                                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                                                                            style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #e0dbd2", borderTopColor: "#d4a843", flexShrink: 0 }} />
+                                                                    )}
+                                                                    {accVerified && <CheckCircle size={16} color="#1db893" strokeWidth={2.5} />}
+                                                                </div>
+                                                                {resolveError && (
+                                                                    <p style={{ fontSize: "0.78rem", color: "#e84343", marginTop: 4, fontWeight: 600 }}>{resolveError}</p>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <div style={{ border: "1.5px solid #e8e2d8", borderRadius: 12, padding: "11px 13px", background: "#fff", fontSize: "0.92rem", color: "#2d3b1f" }}>
+                                                                {accNumber || <span style={{ color: "#b8c0b0" }}>—</span>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Account name — auto populated */}
+                                                    <div>
+                                                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                                                            <User size={13} color="#7c5cbf" strokeWidth={2} />
+                                                            <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#2d3b1f80" }}>Account Name</span>
+                                                            {accVerified && <span style={{ fontSize: "0.68rem", color: "#1db893", background: "#f0faf6", borderRadius: 99, padding: "1px 7px", fontWeight: 600 }}>Auto-verified ✓</span>}
+                                                        </div>
+                                                        <div style={{ border: `1.5px solid ${accVerified ? "#1db893" : "#e8e2d8"}`, borderRadius: 12, padding: "11px 13px", background: accVerified ? "#f0faf6" : "#f8f6f0", fontSize: "0.92rem", color: accVerified ? "#1a5c3a" : "#2d3b1f80", fontWeight: accVerified ? 700 : 400 }}>
+                                                            {accName || <span style={{ color: "#b8c0b0" }}>{resolving ? "Verifying…" : "Auto-fills after account number"}</span>}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 

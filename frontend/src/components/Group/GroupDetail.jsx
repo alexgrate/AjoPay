@@ -160,7 +160,7 @@ const PaymentModal = ({ onClose, contribution, group }) => {
                 {[
                     { Icon: CreditCard, label: "Payment Method", val: "Card via Paystack" },
                     { Icon: Calendar,   label: "Due Date",       val: fmtDate(contribution?.cycle_due_date) },
-                    { Icon: Percent,    label: "Processing Fee", val: "₦150" },
+                    { Icon: Percent,    label: "Processing Fee", val: "₦250" },
                 ].map(({ Icon, label, val }, i) => (
                     <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderBottom: "1px solid #f4f0ea" }}>
                         <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.86rem", color: "#2d3b1f80" }}>
@@ -173,7 +173,7 @@ const PaymentModal = ({ onClose, contribution, group }) => {
                 <div style={{ background: "#f8f6f0", borderRadius: 12, padding: "13px 15px", display: "flex", justifyContent: "space-between", margin: "14px 0 18px" }}>
                     <span style={{ fontWeight: 700, color: "#2d3b1f" }}>Total Debit</span>
                     <span style={{ fontWeight: 900, fontSize: "1.05rem", color: "#2d3b1f", fontFamily: "'Fraunces',serif" }}>
-                        {fmtCurrency(Number(contribution?.amount || group?.contribution_amount || 0) + 150)}
+                        {fmtCurrency(Number(contribution?.amount || group?.contribution_amount || 0) + 200)}
                     </span>
                 </div>
 
