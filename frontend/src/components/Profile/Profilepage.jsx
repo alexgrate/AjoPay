@@ -371,7 +371,7 @@ export default function ProfilePage() {
                     AxiosInstance.get("api/groups/"),
                 ])
 
-                const groups = groupsRes.data
+                const groups = groupRes.data
                 const activeGroups = groups.filter(g => g.status === "active")
 
                 let totalSaved = 0
@@ -387,7 +387,7 @@ export default function ProfilePage() {
                         const res = await AxiosInstance.get(`api/groups/${g.id}/my-contributions/`);
                         const contribs = res.data.contributions || []
 
-                        contribs.ForEach(c => {
+                        contribs.forEach(c => {
                             if (c.status === "paid") {
                                 totalSaved += Number(c.amount || 0)
                                 const paidDate = new Date(c.paid_at)
