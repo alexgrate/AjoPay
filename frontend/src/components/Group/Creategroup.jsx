@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import AxiosInstance from "../AxiosInstance";
 import usePageTitle from "../../hooks/usePageTitle";
+import CoinLoader from "../CoinLoader";
 
 const FloatingUser = ({ x, size, delay, dur }) => (
     <motion.div
@@ -157,6 +158,7 @@ const ErrorBanner = ({ message }) => (
 );
 
 export default function CreateGroup() {
+    const [initLoading, setInitLoading] = useState(true);
     const navigate = useNavigate();
 
     const [step, setStep] = useState(0);
@@ -263,350 +265,358 @@ export default function CreateGroup() {
     };
 
     return (
-        <div style={{ minHeight: "100vh", background: "#f5f0e8", position: "relative", overflowX: "hidden" }}>
-            {floats.map((c, i) => <FloatingUser key={i} {...c} />)}
+        <>
+            <AnimatePresence>
+                {initLoading && <CoinLoader key="loader" onDone={() => setInitLoading(false)} text="Setting up..." />}
+            </AnimatePresence>
 
-            <div style={{ position: "fixed", width: 560, height: 560, borderRadius: "50%", background: "radial-gradient(circle,rgba(45,59,31,0.04),transparent 70%)", top: "5%", left: "-12%", pointerEvents: "none", zIndex: 0 }} />
-            <div style={{ position: "fixed", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(212,168,67,0.06),transparent 70%)", bottom: "8%", right: "-8%", pointerEvents: "none", zIndex: 0 }} />
+            {!initLoading && (
+                <div style={{ minHeight: "100vh", background: "#f5f0e8", position: "relative", overflowX: "hidden" }}>
+                    {floats.map((c, i) => <FloatingUser key={i} {...c} />)}
 
-            <div style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "clamp(32px,5vw,64px) clamp(16px,3vw,32px) 80px" }}>
+                    <div style={{ position: "fixed", width: 560, height: 560, borderRadius: "50%", background: "radial-gradient(circle,rgba(45,59,31,0.04),transparent 70%)", top: "5%", left: "-12%", pointerEvents: "none", zIndex: 0 }} />
+                    <div style={{ position: "fixed", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle,rgba(212,168,67,0.06),transparent 70%)", bottom: "8%", right: "-8%", pointerEvents: "none", zIndex: 0 }} />
 
-                <motion.div initial={{ opacity: 0, y: -18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ textAlign: "center", marginBottom: 36 }}>
-                    <motion.div
-                        animate={{ rotate: [0, 8, -8, 4, 0] }}
-                        transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 3 }}
-                        style={{ width: 68, height: 68, background: "#2d3b1f", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", boxShadow: "0 8px 28px rgba(45,59,31,0.24)" }}>
-                        <Users size={30} color="#d4a843" strokeWidth={1.8} />
-                    </motion.div>
-                    <h1 style={{ fontSize: "clamp(1.9rem,5vw,3rem)", fontWeight: 900, color: "#2d3b1f", fontFamily: "'Fraunces',serif", marginBottom: 10 }}>
-                        Create Your Ajo Group
-                    </h1>
-                    <p style={{ fontSize: "0.97rem", color: "#2d3b1f80" }}>Start a savings circle with your trusted community</p>
-                </motion.div>
+                    <div style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "clamp(32px,5vw,64px) clamp(16px,3vw,32px) 80px" }}>
 
-                {!done && (
-                    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
-                        <StepBar current={step} />
-                    </motion.div>
-                )}
-
-                <motion.div
-                    initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ background: "#fff", borderRadius: 24, padding: "clamp(24px,4vw,44px)", boxShadow: "0 4px 40px rgba(0,0,0,0.07)", border: "1.5px solid #f0ece4", overflow: "hidden" }}>
-
-                    {errors.general && <ErrorBanner message={errors.general} />}
-
-                    <AnimatePresence mode="wait" custom={dir}>
-
-                        {done ? (
-                            <motion.div key="done"
-                                initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                                style={{ textAlign: "center", padding: "20px 0" }}>
-                                <motion.div
-                                    animate={{ scale: [1, 1.1, 1], rotate: [0, 6, -6, 0] }}
-                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 2.5 }}
-                                    style={{ width: 80, height: 80, background: "#2d3b1f", borderRadius: 22, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 22px", boxShadow: "0 8px 28px rgba(45,59,31,0.28)" }}>
-                                    <CheckCircle size={40} color="#d4a843" strokeWidth={1.8} />
-                                </motion.div>
-
-                                <h2 style={{ fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 900, color: "#2d3b1f", fontFamily: "'Fraunces',serif", marginBottom: 10 }}>
-                                    Group Created! 🎉
-                                </h2>
-                                <p style={{ fontSize: "0.95rem", color: "#2d3b1f80", marginBottom: 28, lineHeight: 1.7 }}>
-                                    <strong style={{ color: "#2d3b1f" }}>{createdGroup?.name}</strong> is live.{" "}
-                                    {isPublic
-                                        ? "It's public — people can discover and request to join."
-                                        : "Share the invite code with people you want to join."}
-                                </p>
-
-                                {createdGroup?.invite_code && (
-                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                                        style={{ background: "#f5f8f2", border: "1.5px solid #d8ecd4", borderRadius: 14, padding: "16px 18px", marginBottom: 20 }}>
-                                        <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#2d3b1f70", letterSpacing: "0.1em", marginBottom: 6 }}>INVITE CODE</p>
-                                        <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "#2d3b1f", fontFamily: "monospace", marginBottom: 12, wordBreak: "break-all" }}>
-                                            {createdGroup.invite_code}
-                                        </p>
-                                        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={handleCopyCode}
-                                            style={{ background: copied ? "#2d3b1f" : "#eee9e0", color: copied ? "#d4a843" : "#2d3b1f", border: "none", borderRadius: 9, padding: "9px 18px", fontWeight: 700, fontSize: "0.83rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 7, transition: "background 0.2s" }}>
-                                            {copied ? <><Check size={14} strokeWidth={2.5} />Copied!</> : <><Copy size={14} strokeWidth={2} />Copy Code</>}
-                                        </motion.button>
-                                    </motion.div>
-                                )}
-
-                                <div style={{ background: "linear-gradient(135deg,#f5f8f2,#eef5ee)", border: "1.5px solid #d8ecd4", borderRadius: 18, padding: "20px 22px", marginBottom: 28, textAlign: "left" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                                        <ClipboardList size={15} color="#d4a843" strokeWidth={2} />
-                                        <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#2d3b1f" }}>Group Summary</span>
-                                    </div>
-                                    {[
-                                        ["Group Name",    createdGroup?.name || "—",                                                                               false],
-                                        ["Visibility",    createdGroup?.is_public ? "Public" : "Private",                                                          false],
-                                        ["Max Members",   createdGroup?.max_members || "—",                                                                        false],
-                                        ["Contribution",  createdGroup ? `₦${Number(createdGroup.contribution_amount).toLocaleString()} / ${createdGroup.frequency}` : "—", false],
-                                        ["Total Payout",  createdGroup ? `₦${Number(createdGroup.total_pool).toLocaleString()}` : "—",                             true ],
-                                        ["Start Date",    createdGroup?.start_date || "—",                                                                         false],
-                                        ["Payout Order",  payoutOrder,                                                                                             false],
-                                    ].map(([k, v, gold], i) => (
-                                        <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: i < 6 ? "1px solid rgba(45,59,31,0.07)" : "none" }}>
-                                            <span style={{ fontSize: "0.84rem", color: "#2d3b1f70" }}>{k}:</span>
-                                            <span style={{ fontSize: "0.84rem", fontWeight: 700, color: gold ? "#d4a843" : "#2d3b1f" }}>{v}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <PrimaryBtn
-                                    label="Go to Group"
-                                    icon={<ArrowRight size={17} strokeWidth={2.5} />}
-                                    onClick={() => navigate(`/groups/${createdGroup?.id}`)}  
-                                />
+                        <motion.div initial={{ opacity: 0, y: -18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                            style={{ textAlign: "center", marginBottom: 36 }}>
+                            <motion.div
+                                animate={{ rotate: [0, 8, -8, 4, 0] }}
+                                transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 3 }}
+                                style={{ width: 68, height: 68, background: "#2d3b1f", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", boxShadow: "0 8px 28px rgba(45,59,31,0.24)" }}>
+                                <Users size={30} color="#d4a843" strokeWidth={1.8} />
                             </motion.div>
+                            <h1 style={{ fontSize: "clamp(1.9rem,5vw,3rem)", fontWeight: 900, color: "#2d3b1f", fontFamily: "'Fraunces',serif", marginBottom: 10 }}>
+                                Create Your Ajo Group
+                            </h1>
+                            <p style={{ fontSize: "0.97rem", color: "#2d3b1f80" }}>Start a savings circle with your trusted community</p>
+                        </motion.div>
 
-                        ) : step === 0 ? (
-                            <motion.div key="step1" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit"
-                                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-
-                                    <Field label="Group Name" required>
-                                        <TInput
-                                            value={name}
-                                            onChange={e => { setName(e.target.value); setErrors(v => ({ ...v, name: null })); }}
-                                            placeholder="e.g. Lagos Hustlers Circle"
-                                        />
-                                        {errors.name && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.name}</p>}
-                                    </Field>
-
-                                    <Field label="Description">
-                                        <TArea
-                                            value={description}
-                                            onChange={e => setDescription(e.target.value)}
-                                            placeholder="Tell members what this group is about..."
-                                        />
-                                    </Field>
-
-                                    <Field label="Total Members" required hint="Minimum 2 members, maximum 50 members">
-                                        <TInput
-                                            type="number"
-                                            value={members}
-                                            onChange={e => { setMembers(e.target.value); setErrors(v => ({ ...v, members: null })); }}
-                                            placeholder="e.g. 10"
-                                        />
-                                        {errors.members && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.members}</p>}
-                                    </Field>
-
-                                    <Field
-                                        label="Group Visibility"
-                                        required
-                                        hint={isPublic
-                                            ? "Anyone can find and request to join. You approve or reject each request."
-                                            : "Hidden from discovery. Only people with your invite code can join directly."}
-                                    >
-                                        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                                            <div style={{ flex: "1 1 180px" }}>
-                                                <OptionCard
-                                                    icon={Globe}
-                                                    title="Public"
-                                                    subtitle="Listed & open to requests"
-                                                    selected={isPublic === true}
-                                                    onClick={() => setIsPublic(true)}
-                                                />
-                                            </div>
-                                            <div style={{ flex: "1 1 180px" }}>
-                                                <OptionCard
-                                                    icon={Lock}
-                                                    title="Private"
-                                                    subtitle="Invite code only"
-                                                    selected={isPublic === false}
-                                                    onClick={() => setIsPublic(false)}
-                                                />
-                                            </div>
-                                        </div>
-                                    </Field>
-
-                                    <motion.div
-                                        key={isPublic ? "pub" : "priv"}
-                                        initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-                                        style={{ background: isPublic ? "#f0fff4" : "#fafafa", border: `1.5px solid ${isPublic ? "#b2dfcc" : "#e8e2d8"}`, borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
-                                        {isPublic
-                                            ? <Globe size={15} color="#1a7a3a" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
-                                            : <Lock   size={15} color="#2d3b1f80" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
-                                        }
-                                        <p style={{ fontSize: "0.79rem", color: isPublic ? "#1a7a3a" : "#2d3b1f80", lineHeight: 1.55 }}>
-                                            {isPublic
-                                                ? <><strong>Public group:</strong> Appears in the "Available" tab. New members send a request — you decide who gets in. Invite links still work for direct joins.</>
-                                                : <><strong>Private group:</strong> Not listed anywhere. New members must have your invite code. No requests — invite-only access.</>
-                                            }
-                                        </p>
-                                    </motion.div>
-
-                                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
-                                        <PrimaryBtn label="Next" icon={<ArrowRight size={17} strokeWidth={2.5} />} onClick={handleNext0} />
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                        ) : step === 1 ? (
-                            <motion.div key="step2" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit"
-                                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-
-                                    <Field label="Contribution Amount (₦)" required hint="Amount each member contributes per cycle">
-                                        <TInput
-                                            type="number"
-                                            value={amount}
-                                            onChange={e => { setAmount(e.target.value); setErrors(v => ({ ...v, amount: null })); }}
-                                            placeholder="e.g. 50000"
-                                        />
-                                        {errors.amount && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.amount}</p>}
-                                    </Field>
-
-                                    <Field label="Contribution Frequency" required>
-                                        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                                            <div style={{ flex: "1 1 180px" }}>
-                                                <OptionCard icon={Coins} title="Weekly" subtitle="Contributions every week" selected={frequency === "weekly"} onClick={() => setFrequency("weekly")} />
-                                            </div>
-                                            <div style={{ flex: "1 1 180px" }}>
-                                                <OptionCard icon={Calendar} title="Monthly" subtitle="Contributions every month" selected={frequency === "monthly"} onClick={() => setFrequency("monthly")} />
-                                            </div>
-                                        </div>
-                                    </Field>
-
-                                    <Field label="Start Date" required>
-                                        <div style={{ border: "1.5px solid #e0dbd2", borderRadius: 12, padding: "13px 15px", background: "#fff" }}>
-                                            <input
-                                                type="date" value={startDate}
-                                                onChange={e => { setStartDate(e.target.value); setErrors(v => ({ ...v, startDate: null })); }}
-                                                style={{ width: "100%", border: "none", outline: "none", fontSize: "0.93rem", color: startDate ? "#2d3b1f" : "#b8c0b0", background: "transparent", fontFamily: "'DM Sans',sans-serif" }}
-                                            />
-                                        </div>
-                                        {errors.startDate && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.startDate}</p>}
-                                    </Field>
-
-                                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, flexWrap: "wrap", gap: 10 }}>
-                                        <SecondaryBtn label="Back" icon={<ArrowLeft size={17} strokeWidth={2.5} />} onClick={goBack} />
-                                        <PrimaryBtn   label="Next" icon={<ArrowRight size={17} strokeWidth={2.5} />} onClick={handleNext1} />
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                        ) : (
-                            <motion.div key="step3" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit"
-                                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
-                                    <Field label="Payout Order" required>
-                                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                                            <OptionCard
-                                                icon={ListOrdered}
-                                                title="Sequential"
-                                                subtitle="Members receive payouts in join order"
-                                                selected={true}
-                                                onClick={() => setPayoutOrder("sequential")}
-                                            />
-                                            <div style={{ background: "#f8f6f0", border: "1.5px solid #f0ece4", borderRadius: 14, padding: "13px 16px", display: "flex", alignItems: "center", gap: 10, opacity: 0.6 }}>
-                                                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#f0ece4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                                    <Shuffle size={20} color="#2d3b1f50" strokeWidth={1.8} />
-                                                </div>
-                                                <div>
-                                                    <p style={{ fontWeight: 700, color: "#2d3b1f80", fontSize: "0.95rem" }}>Random</p>
-                                                    <p style={{ fontSize: "0.77rem", color: "#2d3b1f50" }}>Coming soon</p>
-                                                </div>
-                                            </div>
-                                            <div style={{ background: "#f8f6f0", border: "1.5px solid #f0ece4", borderRadius: 14, padding: "13px 16px", display: "flex", alignItems: "center", gap: 10, opacity: 0.6 }}>
-                                                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#f0ece4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                                    <Gavel size={20} color="#2d3b1f50" strokeWidth={1.8} />
-                                                </div>
-                                                <div>
-                                                    <p style={{ fontWeight: 700, color: "#2d3b1f80", fontSize: "0.95rem" }}>Bidding</p>
-                                                    <p style={{ fontSize: "0.77rem", color: "#2d3b1f50" }}>Coming soon</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Field>
-
-                                    {(() => {
-                                        const user = JSON.parse(localStorage.getItem("user") || "{}")
-                                        if (!user.bvn_verified) {
-                                            return (
-                                                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                                                    style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 9 }}>
-                                                    <AlertTriangle size={15} color="#d4a843" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
-                                                    <div>
-                                                        <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#8a6a00", marginBottom: 3 }}>BVN Not Verified</p>
-                                                        <p style={{ fontSize: "0.77rem", color: "#8a6a00", lineHeight: 1.55 }}>
-                                                            You need to verify your BVN before creating a group.{" "}
-                                                            <Link to="/verify-bvn" style={{ color: "#d4a843", fontWeight: 700 }}>Verify now →</Link>
-                                                        </p>
-                                                    </div>
-                                                </motion.div>
-                                            )
-                                        }
-                                        if (isPublic && user.credit_score < 60) {
-                                            return (
-                                                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                                                    style={{ background: "#fff5f5", border: "1.5px solid #ffd0d0", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 9 }}>
-                                                    <AlertTriangle size={15} color="#e84343" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
-                                                    <p style={{ fontSize: "0.8rem", color: "#e84343", lineHeight: 1.55 }}>
-                                                        <strong>Credit score too low for public groups.</strong> Your score is {user.credit_score}. Need 60+ to create a public group. Switch to Private or improve your credit score.
-                                                    </p>
-                                                </motion.div>
-                                            );
-                                        }
-                                        return null;
-                                    })()}
-
-                                    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                                        style={{ background: "linear-gradient(135deg,#f5f8f2,#eef5ee)", border: "1.5px solid #d8ecd4", borderRadius: 16, padding: "18px 20px" }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                                            <ClipboardList size={15} color="#d4a843" strokeWidth={2} />
-                                            <span style={{ fontWeight: 800, color: "#2d3b1f", fontSize: "0.95rem" }}>Group Summary</span>
-                                        </div>
-                                        {[
-                                            ["Group Name",    name    || "—",                                                          false],
-                                            ["Visibility",    isPublic ? "Public" : "Private",                                         false],
-                                            ["Members",       members || "—",                                                          false],
-                                            ["Contribution",  amount ? `₦${Number(amount).toLocaleString()} / ${frequency}` : "—",    false],
-                                            ["Total Payout",  totalPayout,                                                             true ],
-                                        ].map(([k, v, gold], i) => (
-                                            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < 4 ? "1px solid rgba(45,59,31,0.07)" : "none" }}>
-                                                <span style={{ fontSize: "0.84rem", color: "#2d3b1f70" }}>{k}:</span>
-                                                <span style={{ fontSize: "0.84rem", fontWeight: 700, color: gold ? "#d4a843" : "#2d3b1f", display: "flex", alignItems: "center", gap: 5 }}>
-                                                    {k === "Visibility" && (
-                                                        isPublic
-                                                            ? <Globe size={11} color="#1a7a3a" strokeWidth={2.5} />
-                                                            : <Lock  size={11} color="#2d3b1f80" strokeWidth={2.5} />
-                                                    )}
-                                                    {v}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </motion.div>
-
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, flexWrap: "wrap", gap: 10 }}>
-                                        <SecondaryBtn label="Back" icon={<ArrowLeft size={17} strokeWidth={2.5} />} onClick={goBack} />
-                                        <GoldBtn
-                                            label={loading ? "Creating..." : "Create Group"}
-                                            icon={loading ? null : <Check size={17} strokeWidth={2.5} />}
-                                            onClick={handleCreate}
-                                            disabled={loading}
-                                        />
-                                    </div>
-                                </div>
+                        {!done && (
+                            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+                                <StepBar current={step} />
                             </motion.div>
                         )}
-                    </AnimatePresence>
-                </motion.div>
 
-                {!done && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} style={{ textAlign: "center", marginTop: 20 }}>
-                        <Link to="/groups" style={{ fontSize: "0.84rem", color: "#2d3b1f80", textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 5 }}>
-                            <ChevronLeft size={14} />Back to Groups
-                        </Link>
-                    </motion.div>
-                )}
-            </div>
-        </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                            style={{ background: "#fff", borderRadius: 24, padding: "clamp(24px,4vw,44px)", boxShadow: "0 4px 40px rgba(0,0,0,0.07)", border: "1.5px solid #f0ece4", overflow: "hidden" }}>
+
+                            {errors.general && <ErrorBanner message={errors.general} />}
+
+                            <AnimatePresence mode="wait" custom={dir}>
+
+                                {done ? (
+                                    <motion.div key="done"
+                                        initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                        style={{ textAlign: "center", padding: "20px 0" }}>
+                                        <motion.div
+                                            animate={{ scale: [1, 1.1, 1], rotate: [0, 6, -6, 0] }}
+                                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 2.5 }}
+                                            style={{ width: 80, height: 80, background: "#2d3b1f", borderRadius: 22, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 22px", boxShadow: "0 8px 28px rgba(45,59,31,0.28)" }}>
+                                            <CheckCircle size={40} color="#d4a843" strokeWidth={1.8} />
+                                        </motion.div>
+
+                                        <h2 style={{ fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 900, color: "#2d3b1f", fontFamily: "'Fraunces',serif", marginBottom: 10 }}>
+                                            Group Created! 🎉
+                                        </h2>
+                                        <p style={{ fontSize: "0.95rem", color: "#2d3b1f80", marginBottom: 28, lineHeight: 1.7 }}>
+                                            <strong style={{ color: "#2d3b1f" }}>{createdGroup?.name}</strong> is live.{" "}
+                                            {isPublic
+                                                ? "It's public — people can discover and request to join."
+                                                : "Share the invite code with people you want to join."}
+                                        </p>
+
+                                        {createdGroup?.invite_code && (
+                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+                                                style={{ background: "#f5f8f2", border: "1.5px solid #d8ecd4", borderRadius: 14, padding: "16px 18px", marginBottom: 20 }}>
+                                                <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#2d3b1f70", letterSpacing: "0.1em", marginBottom: 6 }}>INVITE CODE</p>
+                                                <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "#2d3b1f", fontFamily: "monospace", marginBottom: 12, wordBreak: "break-all" }}>
+                                                    {createdGroup.invite_code}
+                                                </p>
+                                                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={handleCopyCode}
+                                                    style={{ background: copied ? "#2d3b1f" : "#eee9e0", color: copied ? "#d4a843" : "#2d3b1f", border: "none", borderRadius: 9, padding: "9px 18px", fontWeight: 700, fontSize: "0.83rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 7, transition: "background 0.2s" }}>
+                                                    {copied ? <><Check size={14} strokeWidth={2.5} />Copied!</> : <><Copy size={14} strokeWidth={2} />Copy Code</>}
+                                                </motion.button>
+                                            </motion.div>
+                                        )}
+
+                                        <div style={{ background: "linear-gradient(135deg,#f5f8f2,#eef5ee)", border: "1.5px solid #d8ecd4", borderRadius: 18, padding: "20px 22px", marginBottom: 28, textAlign: "left" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                                                <ClipboardList size={15} color="#d4a843" strokeWidth={2} />
+                                                <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#2d3b1f" }}>Group Summary</span>
+                                            </div>
+                                            {[
+                                                ["Group Name",    createdGroup?.name || "—",                                                                               false],
+                                                ["Visibility",    createdGroup?.is_public ? "Public" : "Private",                                                          false],
+                                                ["Max Members",   createdGroup?.max_members || "—",                                                                        false],
+                                                ["Contribution",  createdGroup ? `₦${Number(createdGroup.contribution_amount).toLocaleString()} / ${createdGroup.frequency}` : "—", false],
+                                                ["Total Payout",  createdGroup ? `₦${Number(createdGroup.total_pool).toLocaleString()}` : "—",                             true ],
+                                                ["Start Date",    createdGroup?.start_date || "—",                                                                         false],
+                                                ["Payout Order",  payoutOrder,                                                                                             false],
+                                            ].map(([k, v, gold], i) => (
+                                                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: i < 6 ? "1px solid rgba(45,59,31,0.07)" : "none" }}>
+                                                    <span style={{ fontSize: "0.84rem", color: "#2d3b1f70" }}>{k}:</span>
+                                                    <span style={{ fontSize: "0.84rem", fontWeight: 700, color: gold ? "#d4a843" : "#2d3b1f" }}>{v}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <PrimaryBtn
+                                            label="Go to Group"
+                                            icon={<ArrowRight size={17} strokeWidth={2.5} />}
+                                            onClick={() => navigate(`/groups/${createdGroup?.id}`)}  
+                                        />
+                                    </motion.div>
+
+                                ) : step === 0 ? (
+                                    <motion.div key="step1" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit"
+                                        transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+
+                                            <Field label="Group Name" required>
+                                                <TInput
+                                                    value={name}
+                                                    onChange={e => { setName(e.target.value); setErrors(v => ({ ...v, name: null })); }}
+                                                    placeholder="e.g. Lagos Hustlers Circle"
+                                                />
+                                                {errors.name && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.name}</p>}
+                                            </Field>
+
+                                            <Field label="Description">
+                                                <TArea
+                                                    value={description}
+                                                    onChange={e => setDescription(e.target.value)}
+                                                    placeholder="Tell members what this group is about..."
+                                                />
+                                            </Field>
+
+                                            <Field label="Total Members" required hint="Minimum 2 members, maximum 50 members">
+                                                <TInput
+                                                    type="number"
+                                                    value={members}
+                                                    onChange={e => { setMembers(e.target.value); setErrors(v => ({ ...v, members: null })); }}
+                                                    placeholder="e.g. 10"
+                                                />
+                                                {errors.members && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.members}</p>}
+                                            </Field>
+
+                                            <Field
+                                                label="Group Visibility"
+                                                required
+                                                hint={isPublic
+                                                    ? "Anyone can find and request to join. You approve or reject each request."
+                                                    : "Hidden from discovery. Only people with your invite code can join directly."}
+                                            >
+                                                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                                                    <div style={{ flex: "1 1 180px" }}>
+                                                        <OptionCard
+                                                            icon={Globe}
+                                                            title="Public"
+                                                            subtitle="Listed & open to requests"
+                                                            selected={isPublic === true}
+                                                            onClick={() => setIsPublic(true)}
+                                                        />
+                                                    </div>
+                                                    <div style={{ flex: "1 1 180px" }}>
+                                                        <OptionCard
+                                                            icon={Lock}
+                                                            title="Private"
+                                                            subtitle="Invite code only"
+                                                            selected={isPublic === false}
+                                                            onClick={() => setIsPublic(false)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </Field>
+
+                                            <motion.div
+                                                key={isPublic ? "pub" : "priv"}
+                                                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
+                                                style={{ background: isPublic ? "#f0fff4" : "#fafafa", border: `1.5px solid ${isPublic ? "#b2dfcc" : "#e8e2d8"}`, borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                                {isPublic
+                                                    ? <Globe size={15} color="#1a7a3a" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
+                                                    : <Lock   size={15} color="#2d3b1f80" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
+                                                }
+                                                <p style={{ fontSize: "0.79rem", color: isPublic ? "#1a7a3a" : "#2d3b1f80", lineHeight: 1.55 }}>
+                                                    {isPublic
+                                                        ? <><strong>Public group:</strong> Appears in the "Available" tab. New members send a request — you decide who gets in. Invite links still work for direct joins.</>
+                                                        : <><strong>Private group:</strong> Not listed anywhere. New members must have your invite code. No requests — invite-only access.</>
+                                                    }
+                                                </p>
+                                            </motion.div>
+
+                                            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+                                                <PrimaryBtn label="Next" icon={<ArrowRight size={17} strokeWidth={2.5} />} onClick={handleNext0} />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+
+                                ) : step === 1 ? (
+                                    <motion.div key="step2" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit"
+                                        transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+
+                                            <Field label="Contribution Amount (₦)" required hint="Amount each member contributes per cycle">
+                                                <TInput
+                                                    type="number"
+                                                    value={amount}
+                                                    onChange={e => { setAmount(e.target.value); setErrors(v => ({ ...v, amount: null })); }}
+                                                    placeholder="e.g. 50000"
+                                                />
+                                                {errors.amount && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.amount}</p>}
+                                            </Field>
+
+                                            <Field label="Contribution Frequency" required>
+                                                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                                                    <div style={{ flex: "1 1 180px" }}>
+                                                        <OptionCard icon={Coins} title="Weekly" subtitle="Contributions every week" selected={frequency === "weekly"} onClick={() => setFrequency("weekly")} />
+                                                    </div>
+                                                    <div style={{ flex: "1 1 180px" }}>
+                                                        <OptionCard icon={Calendar} title="Monthly" subtitle="Contributions every month" selected={frequency === "monthly"} onClick={() => setFrequency("monthly")} />
+                                                    </div>
+                                                </div>
+                                            </Field>
+
+                                            <Field label="Start Date" required>
+                                                <div style={{ border: "1.5px solid #e0dbd2", borderRadius: 12, padding: "13px 15px", background: "#fff" }}>
+                                                    <input
+                                                        type="date" value={startDate}
+                                                        onChange={e => { setStartDate(e.target.value); setErrors(v => ({ ...v, startDate: null })); }}
+                                                        style={{ width: "100%", border: "none", outline: "none", fontSize: "0.93rem", color: startDate ? "#2d3b1f" : "#b8c0b0", background: "transparent", fontFamily: "'DM Sans',sans-serif" }}
+                                                    />
+                                                </div>
+                                                {errors.startDate && <p style={{ color: "#e84343", fontSize: "0.78rem", marginTop: 4 }}>{errors.startDate}</p>}
+                                            </Field>
+
+                                            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, flexWrap: "wrap", gap: 10 }}>
+                                                <SecondaryBtn label="Back" icon={<ArrowLeft size={17} strokeWidth={2.5} />} onClick={goBack} />
+                                                <PrimaryBtn   label="Next" icon={<ArrowRight size={17} strokeWidth={2.5} />} onClick={handleNext1} />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+
+                                ) : (
+                                    <motion.div key="step3" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit"
+                                        transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+                                            <Field label="Payout Order" required>
+                                                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                                    <OptionCard
+                                                        icon={ListOrdered}
+                                                        title="Sequential"
+                                                        subtitle="Members receive payouts in join order"
+                                                        selected={true}
+                                                        onClick={() => setPayoutOrder("sequential")}
+                                                    />
+                                                    <div style={{ background: "#f8f6f0", border: "1.5px solid #f0ece4", borderRadius: 14, padding: "13px 16px", display: "flex", alignItems: "center", gap: 10, opacity: 0.6 }}>
+                                                        <div style={{ width: 44, height: 44, borderRadius: 12, background: "#f0ece4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                            <Shuffle size={20} color="#2d3b1f50" strokeWidth={1.8} />
+                                                        </div>
+                                                        <div>
+                                                            <p style={{ fontWeight: 700, color: "#2d3b1f80", fontSize: "0.95rem" }}>Random</p>
+                                                            <p style={{ fontSize: "0.77rem", color: "#2d3b1f50" }}>Coming soon</p>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ background: "#f8f6f0", border: "1.5px solid #f0ece4", borderRadius: 14, padding: "13px 16px", display: "flex", alignItems: "center", gap: 10, opacity: 0.6 }}>
+                                                        <div style={{ width: 44, height: 44, borderRadius: 12, background: "#f0ece4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                            <Gavel size={20} color="#2d3b1f50" strokeWidth={1.8} />
+                                                        </div>
+                                                        <div>
+                                                            <p style={{ fontWeight: 700, color: "#2d3b1f80", fontSize: "0.95rem" }}>Bidding</p>
+                                                            <p style={{ fontSize: "0.77rem", color: "#2d3b1f50" }}>Coming soon</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Field>
+
+                                            {(() => {
+                                                const user = JSON.parse(localStorage.getItem("user") || "{}")
+                                                if (!user.bvn_verified) {
+                                                    return (
+                                                        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                                                            style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 9 }}>
+                                                            <AlertTriangle size={15} color="#d4a843" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
+                                                            <div>
+                                                                <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#8a6a00", marginBottom: 3 }}>BVN Not Verified</p>
+                                                                <p style={{ fontSize: "0.77rem", color: "#8a6a00", lineHeight: 1.55 }}>
+                                                                    You need to verify your BVN before creating a group.{" "}
+                                                                    <Link to="/verify-bvn" style={{ color: "#d4a843", fontWeight: 700 }}>Verify now →</Link>
+                                                                </p>
+                                                            </div>
+                                                        </motion.div>
+                                                    )
+                                                }
+                                                if (isPublic && user.credit_score < 60) {
+                                                    return (
+                                                        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                                                            style={{ background: "#fff5f5", border: "1.5px solid #ffd0d0", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 9 }}>
+                                                            <AlertTriangle size={15} color="#e84343" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
+                                                            <p style={{ fontSize: "0.8rem", color: "#e84343", lineHeight: 1.55 }}>
+                                                                <strong>Credit score too low for public groups.</strong> Your score is {user.credit_score}. Need 60+ to create a public group. Switch to Private or improve your credit score.
+                                                            </p>
+                                                        </motion.div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+
+                                            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+                                                style={{ background: "linear-gradient(135deg,#f5f8f2,#eef5ee)", border: "1.5px solid #d8ecd4", borderRadius: 16, padding: "18px 20px" }}>
+                                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                                                    <ClipboardList size={15} color="#d4a843" strokeWidth={2} />
+                                                    <span style={{ fontWeight: 800, color: "#2d3b1f", fontSize: "0.95rem" }}>Group Summary</span>
+                                                </div>
+                                                {[
+                                                    ["Group Name",    name    || "—",                                                          false],
+                                                    ["Visibility",    isPublic ? "Public" : "Private",                                         false],
+                                                    ["Members",       members || "—",                                                          false],
+                                                    ["Contribution",  amount ? `₦${Number(amount).toLocaleString()} / ${frequency}` : "—",    false],
+                                                    ["Total Payout",  totalPayout,                                                             true ],
+                                                ].map(([k, v, gold], i) => (
+                                                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < 4 ? "1px solid rgba(45,59,31,0.07)" : "none" }}>
+                                                        <span style={{ fontSize: "0.84rem", color: "#2d3b1f70" }}>{k}:</span>
+                                                        <span style={{ fontSize: "0.84rem", fontWeight: 700, color: gold ? "#d4a843" : "#2d3b1f", display: "flex", alignItems: "center", gap: 5 }}>
+                                                            {k === "Visibility" && (
+                                                                isPublic
+                                                                    ? <Globe size={11} color="#1a7a3a" strokeWidth={2.5} />
+                                                                    : <Lock  size={11} color="#2d3b1f80" strokeWidth={2.5} />
+                                                            )}
+                                                            {v}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </motion.div>
+
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, flexWrap: "wrap", gap: 10 }}>
+                                                <SecondaryBtn label="Back" icon={<ArrowLeft size={17} strokeWidth={2.5} />} onClick={goBack} />
+                                                <GoldBtn
+                                                    label={loading ? "Creating..." : "Create Group"}
+                                                    icon={loading ? null : <Check size={17} strokeWidth={2.5} />}
+                                                    onClick={handleCreate}
+                                                    disabled={loading}
+                                                />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+
+                        {!done && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} style={{ textAlign: "center", marginTop: 20 }}>
+                                <Link to="/groups" style={{ fontSize: "0.84rem", color: "#2d3b1f80", textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 5 }}>
+                                    <ChevronLeft size={14} />Back to Groups
+                                </Link>
+                            </motion.div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </>
     );
 }

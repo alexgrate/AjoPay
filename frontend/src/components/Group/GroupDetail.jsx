@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import AxiosInstance from "../AxiosInstance";
 import usePageTitle from "../../hooks/usePageTitle";
+import CoinLoader from "../CoinLoader";
 
 const MotionLink = motion.create(Link);
 
@@ -395,13 +396,6 @@ const CountTile = ({ val, label, delay }) => (
     </div>
 );
 
-const LoadingScreen = () => (
-    <div style={{ minHeight: "100vh", background: "#f5f0e8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-            style={{ width: 48, height: 48, borderRadius: "50%", border: "3px solid #e0dbd2", borderTopColor: "#2d3b1f" }} />
-    </div>
-);
-
 const ErrorScreen = ({ type, onRetry }) => (
     <div style={{ minHeight: "100vh", background: "#f5f0e8", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -776,7 +770,11 @@ const GroupDetail = () => {
         ? { label: "Admin",  bg: "#fff8e0", color: "#8a6a00",   Icon: Trophy }
         : { label: "Member", bg: "#f4f0ea", color: "#2d3b1f99", Icon: Users  };
 
-    if (loading) return <LoadingScreen />;
+    if (loading) return (
+        <AnimatePresence>
+            <CoinLoader text="Loading group..." />
+        </AnimatePresence>
+    );
     if (error)   return <ErrorScreen type={error} onRetry={fetchGroup} />;
     if (!group)  return null;
 

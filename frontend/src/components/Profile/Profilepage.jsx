@@ -11,6 +11,7 @@ import {
 import AxiosInstance from "../AxiosInstance";
 import { useLogout } from "../../hooks/useLogout";
 import usePageTitle from "../../hooks/usePageTitle";
+import CoinLoader from "../CoinLoader";
 
 const getInitials = (name = "") => {
     const parts = name.trim().split(" ").filter(Boolean);
@@ -288,6 +289,72 @@ export default function ProfilePage() {
         fetchUser();
     }, []);
 
+    const [stats, setStats] = useState({
+        groupsJoined: 0,
+        totalSaved: 0,
+        payoutsRecieved: 0,
+        contributionsThisMonth: 0,
+        groupsActive: 0,
+    })
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const [groupRes] = await Promise.all([
+                    AxiosInstance.get("api/groups/"),
+                ])
+
+                const groups = groupsRes.data
+                const activeGroups = groups.filter(g => g.status === "active")
+
+                let totalSaved = 0
+                let payoutsRecieved = 0
+                let contribsThisMonth = 0
+
+                const now = new Date()
+                const thisMonth = now.getMonth()
+                const thisYear = now.getFullYear()
+
+                await Promise.all(groups.map(async (g) => {
+                    try {
+                        const res = await AxiosInstance.get(`api/groups/${g.id}/my-contributions/`);
+                        const contribs = res.data.contributions || []
+
+                        contribs.ForEach(c => {
+                            if (c.status === "paid") {
+                                totalSaved += Number(c.amount || 0)
+                                const paidDate = new Date(c.paid_at)
+                                if (paidDate.getMonth() === thisMonth && paidDate.getFullYear() === thisYear) {
+                                    contribsThisMonth += 1
+                                }
+                            }
+                        })
+                    } catch {}
+
+                    try {
+                        const cyclesRes = await AxiosInstance.get(`api/groups/${g.id}/cycles/`);
+                        const cycles = cyclesRes.data || [];
+                        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+                        cycles.forEach(c => {
+                            if (c.status === "paid_out" && c.recipient_name === currentUser.full_name) {
+                                payoutsReceived += 1;
+                            }
+                        });
+                    } catch {}
+                }))
+
+                setStats({
+                    groupsJoined: groups.length,
+                    totalSaved,
+                    payoutsReceived,
+                    contributionsThisMonth: contribsThisMonth,
+                    groupsActive: activeGroups.length,
+                })
+            } catch {}
+        }
+        fetchStats()
+    }, [])
+
     const handleSave = async () => {
         setSaving(true);
         try {
@@ -372,10 +439,9 @@ export default function ProfilePage() {
 
     if (loadingUser) {
         return (
-            <div style={{ minHeight: "100vh", background: "#f5f0e8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    style={{ width: 48, height: 48, borderRadius: "50%", border: "3px solid #e0dbd2", borderTopColor: "#2d3b1f" }} />
-            </div>
+            <AnimatePresence>
+                <CoinLoader text="Loading profile" />
+            </AnimatePresence>
         );
     }
 
@@ -455,9 +521,9 @@ export default function ProfilePage() {
                     </motion.div>
 
                     <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-                        <StatCard value="—" label="Groups Joined" bg="linear-gradient(135deg,#1db893,#0fa87a)" icon={<Users size={64} color="#fff" />} delay={0.08} />
-                        <StatCard value="—" label="Total Saved" bg="linear-gradient(135deg,#d4a843,#e8c055)" icon={<CircleDollarSign size={64} color="#fff" />} delay={0.15} />
-                        <StatCard value="—" label="Payouts Received" bg="#fff" textColor="#2d3b1f" icon={<PartyPopper size={64} color="#2d3b1f" />} delay={0.22} />
+                        <StatCard value={stats.groupsJoined} label="Groups Joined" bg="linear-gradient(135deg,#1db893,#0fa87a)" icon={<Users size={64} color="#fff" />} delay={0.08} />
+                        <StatCard value={`₦${Number(stats.totalSaved).toLocaleString()}`} label="Total Saved" bg="linear-gradient(135deg,#d4a843,#e8c055)" icon={<CircleDollarSign size={64} color="#fff" />} delay={0.15} />
+                        <StatCard value={stats.payoutsRecieved} label="Payouts Received" bg="#fff" textColor="#2d3b1f" icon={<PartyPopper size={64} color="#2d3b1f" />} delay={0.22} />
                         <StatCard value={user?.trust_score ?? 0} label={user?.trust_tier?.label || "New Member"} bg="linear-gradient(135deg,#5b6ef5,#8b5cf6)" icon={<Star size={64} color="#fff" />} delay={0.29} />
                     </div>
 
@@ -720,10 +786,46 @@ export default function ProfilePage() {
                                     <h3 style={{ fontWeight: 800, color: "#2d3b1f", fontSize: "0.97rem" }}>Achievements</h3>
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                                    <AchievBadge icon="🚀" title="Early Adopter"     sub="Joined in first 100 users" gold />
-                                    <AchievBadge icon="💎" title="Consistent Saver"  sub="Never missed a payment"   gold />
-                                    <AchievBadge icon="🌟" title="Community Builder" sub="Created 5+ groups"        gold />
-                                    <AchievBadge icon="👑" title="Millionaire Club"  sub="Save ₦1M+ total"          gold={false} />
+                                    {[
+                                        {
+                                            icon:  "🚀",
+                                            title: "Early Adopter",
+                                            sub:   "Joined AjoPay",
+                                            gold:  true,
+                                        },
+                                        {
+                                            icon:  "💎",
+                                            title: "Consistent Saver",
+                                            sub:   stats.payoutsRecieved > 0 ? `Received ${stats.payoutsReceived} payout${stats.payoutsReceived !== 1 ? "s" : ""}` : "Complete a cycle to unlock",
+                                            gold:  stats.payoutsRecieved > 0,
+                                        },
+                                        {
+                                            icon: "🏦",
+                                            title: "Bank Verified",
+                                            sub: !!(user?.bank_name && user?.account_number) ? "Bank details complete" : "Add bank details to unlock",
+                                            gold: !!(user?.bank_name && user?.account_number),
+                                        },
+                                        {
+                                            icon:  "🔐",
+                                            title: "Identity Verified",
+                                            sub:   user?.bvn_verified ? "BVN verified" : "Verify BVN to unlock",
+                                            gold:  !!user?.bvn_verified,
+                                        },
+                                        {
+                                            icon:  "🌟",
+                                            title: "Trusted Member",
+                                            sub:   (user?.trust_score ?? 0) >= 51 ? `Trust score: ${user.trust_score}` : `Need 51+ trust score (${user?.trust_score ?? 0}/51)`,
+                                            gold:  (user?.trust_score ?? 0) >= 51,
+                                        },
+                                        {
+                                            icon:  "👑",
+                                            title: "Millionaire Club",
+                                            sub:   stats.totalSaved >= 1000000 ? `₦${Number(stats.totalSaved).toLocaleString()} saved` : `₦${Number(stats.totalSaved).toLocaleString()} of ₦1M`,
+                                            gold:  stats.totalSaved >= 1000000,
+                                        },
+                                    ].map((a, i) => (
+                                        <AchievBadge key={i} icon={a.icon} title={a.title} sub={a.sub} gold={a.gold} />
+                                    ))}
                                 </div>
                             </motion.div>
 
@@ -744,10 +846,10 @@ export default function ProfilePage() {
                                 style={{ background: "#fff", borderRadius: 20, padding: "20px 18px", border: "1.5px solid #f0ece4", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
                                 <h3 style={{ fontWeight: 800, color: "#2d3b1f", fontSize: "0.95rem", marginBottom: 13 }}>This Month</h3>
                                 {[
-                                    { icon: "💸", label: "Contributions Made", val: "—" },
-                                    { icon: "📈", label: "Savings Growth",     val: "—" },
-                                    { icon: "🎯", label: "Payment Streak",     val: "—" },
-                                    { icon: "🤝", label: "Groups Active",      val: "—" },
+                                    { icon: "💸", label: "Contributions Made", val: stats.contributionsThisMonth > 0 ? `${stats.contributionsThisMonth}` : "-" },
+                                    { icon: "📈", label: "Total Saved",     val: stats.totalSaved > 0 ? `₦${Number(stats.totalSaved).toLocaleString()}` : "-" },
+                                    { icon: "🎯", label: "Payouts Recieved",     val: stats.payoutsRecieved > 0 ? stats.payoutsRecieved : "-" },
+                                    { icon: "🤝", label: "Groups Active",      val: stats.groupsActive > 0 ? stats.groupsActive : "-" },
                                 ].map(({ icon, label, val }, i) => (
                                     <motion.div key={i} initial={{ opacity: 0, x: 8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                                         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: i < 3 ? "1px solid #f4f0ea" : "none" }}>

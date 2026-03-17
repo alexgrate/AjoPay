@@ -4,6 +4,7 @@ import { Users, Plus, LayoutGrid, Search, Calendar, ArrowRight, Coins, Globe, Lo
 import { useNavigate, Link } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
 import usePageTitle from "../../hooks/usePageTitle";
+import CoinLoader from "../CoinLoader";
 
 const MotionLink = motion.create(Link);
 
@@ -230,6 +231,7 @@ const Spinner = () => (
 );
 
 const Groupspage = () => {
+    const [initLoading, setInitLoading] = useState(true);
     const navigate = useNavigate();
 
     const [activeTab,    setActiveTab]    = useState("all");
@@ -342,152 +344,159 @@ const Groupspage = () => {
     };
 
     return (
-        <div style={{ minHeight: "100vh", background: "#f5f0e8", position: "relative", overflow: "hidden" }}>
-            {coinSeeds.map((c, i) => <FloatingCoin key={i} {...c} />)}
+        <>
+            <AnimatePresence>
+                {initLoading && <CoinLoader key="loader" onDone={() => setInitLoading(false)} text="Loading groups..." />}
+            </AnimatePresence>
 
-            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "clamp(28px,5vw,64px) clamp(16px,3vw,40px) 80px", position: "relative", zIndex: 1 }}>
+            {!initLoading && (
+                <div style={{ minHeight: "100vh", background: "#f5f0e8", position: "relative", overflow: "hidden" }}>
+                    {coinSeeds.map((c, i) => <FloatingCoin key={i} {...c} />)}
 
-                {/* Header */}
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 32, marginTop: 20 }}>
-                    <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
-                        <h1 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 900, color: "#2d3b1f", lineHeight: 1.1, marginBottom: 8, fontFamily: "'Fraunces',serif" }}>
-                            Ajo Groups
-                        </h1>
-                        <p style={{ fontSize: "0.95rem", color: "#2d3b1f80" }}>Join or create savings circles with your community</p>
-                    </motion.div>
+                    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "clamp(28px,5vw,64px) clamp(16px,3vw,40px) 80px", position: "relative", zIndex: 1 }}>
 
-                    <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
-                        <MotionLink to="/create-group"
-                            whileHover={{ scale: 1.04, backgroundColor: "#1a2c10" }} whileTap={{ scale: 0.96 }}
-                            style={{ background: "#2d3b1f", color: "#fff", borderRadius: 14, padding: "13px 24px", fontSize: "0.92rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(45,59,31,0.28)", textDecoration: "none" }}>
-                            <motion.span whileHover={{ rotate: 90 }} transition={{ duration: 0.3 }}>
-                                <Plus size={17} strokeWidth={2.5} />
-                            </motion.span>
-                            Create New Group
-                        </MotionLink>
-                    </motion.div>
-                </div>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 32, marginTop: 20 }}>
+                            <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
+                                <h1 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 900, color: "#2d3b1f", lineHeight: 1.1, marginBottom: 8, fontFamily: "'Fraunces',serif" }}>
+                                    Ajo Groups
+                                </h1>
+                                <p style={{ fontSize: "0.95rem", color: "#2d3b1f80" }}>Join or create savings circles with your community</p>
+                            </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} style={{ marginBottom: 20 }}>
-                    <motion.div
-                        animate={{ borderColor: searchFocused ? "#d4a843" : "#e8e2d8", boxShadow: searchFocused ? "0 0 0 3px rgba(212,168,67,0.12)" : "0 2px 12px rgba(0,0,0,0.05)" }}
-                        transition={{ duration: 0.2 }}
-                        style={{ background: "#fff", border: "1.5px solid #e8e2d8", borderRadius: 16, padding: "15px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-                        <motion.span whileHover={{ rotate: 20 }} style={{ display: "inline-flex", flexShrink: 0 }}>
-                            <Search size={18} color={searchFocused ? "#d4a843" : "#b8c0b0"} strokeWidth={2} />
-                        </motion.span>
-                        <input
-                            style={{ flex: 1, border: "none", outline: "none", fontSize: "0.93rem", color: "#2d3b1f", background: "transparent", fontFamily: "'DM Sans',sans-serif" }}
-                            placeholder={activeTab === "available" ? "Search public groups..." : "Search groups by name or description..."}
-                            value={query}
-                            onChange={e => setQuery(e.target.value)}
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={() => setSearchFocused(false)}
-                        />
-                        {query && (
-                            <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-                                onClick={() => setQuery("")}
-                                style={{ background: "none", border: "none", cursor: "pointer", color: "#2d3b1f60", fontSize: "1rem", lineHeight: 1, padding: "0 2px" }}>
-                                ✕
-                            </motion.button>
-                        )}
-                    </motion.div>
-                </motion.div>
+                            <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
+                                <MotionLink to="/create-group"
+                                    whileHover={{ scale: 1.04, backgroundColor: "#1a2c10" }} whileTap={{ scale: 0.96 }}
+                                    style={{ background: "#2d3b1f", color: "#fff", borderRadius: 14, padding: "13px 24px", fontSize: "0.92rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(45,59,31,0.28)", textDecoration: "none" }}>
+                                    <motion.span whileHover={{ rotate: 90 }} transition={{ duration: 0.3 }}>
+                                        <Plus size={17} strokeWidth={2.5} />
+                                    </motion.span>
+                                    Create New Group
+                                </MotionLink>
+                            </motion.div>
+                        </div>
 
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.18 }}
-                    style={{ background: "#fff", borderRadius: 16, padding: "6px", display: "flex", gap: 4, marginBottom: 32, border: "1.5px solid #f0ece4", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
-                    {tabs.map(({ key, label, Icon }) => {
-                        const active = activeTab === key;
-                        const showBadge = key === "available" && pubFetched && publicGroups.length > 0;
-                        return (
-                            <motion.button key={key} onClick={() => handleTabChange(key)} whileTap={{ scale: 0.97 }}
-                                style={{ flex: 1, border: "none", cursor: "pointer", borderRadius: 12, padding: "12px 10px", background: active ? "#2d3b1f" : "transparent", color: active ? "#fff" : "#2d3b1f99", fontSize: "0.88rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, transition: "background 0.2s, color 0.2s", position: "relative" }}>
-                                <motion.span whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }} style={{ display: "inline-flex" }}>
-                                    <Icon size={15} strokeWidth={2} />
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} style={{ marginBottom: 20 }}>
+                            <motion.div
+                                animate={{ borderColor: searchFocused ? "#d4a843" : "#e8e2d8", boxShadow: searchFocused ? "0 0 0 3px rgba(212,168,67,0.12)" : "0 2px 12px rgba(0,0,0,0.05)" }}
+                                transition={{ duration: 0.2 }}
+                                style={{ background: "#fff", border: "1.5px solid #e8e2d8", borderRadius: 16, padding: "15px 20px", display: "flex", alignItems: "center", gap: 12 }}>
+                                <motion.span whileHover={{ rotate: 20 }} style={{ display: "inline-flex", flexShrink: 0 }}>
+                                    <Search size={18} color={searchFocused ? "#d4a843" : "#b8c0b0"} strokeWidth={2} />
                                 </motion.span>
-                                {label}
-                                {showBadge && (
-                                    <span style={{ background: active ? "#d4a843" : "#2d3b1f", color: active ? "#2d3b1f" : "#fff", fontSize: "0.65rem", fontWeight: 800, borderRadius: 99, padding: "1px 6px", marginLeft: 2 }}>
-                                        {publicGroups.length}
-                                    </span>
+                                <input
+                                    style={{ flex: 1, border: "none", outline: "none", fontSize: "0.93rem", color: "#2d3b1f", background: "transparent", fontFamily: "'DM Sans',sans-serif" }}
+                                    placeholder={activeTab === "available" ? "Search public groups..." : "Search groups by name or description..."}
+                                    value={query}
+                                    onChange={e => setQuery(e.target.value)}
+                                    onFocus={() => setSearchFocused(true)}
+                                    onBlur={() => setSearchFocused(false)}
+                                />
+                                {query && (
+                                    <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                                        onClick={() => setQuery("")}
+                                        style={{ background: "none", border: "none", cursor: "pointer", color: "#2d3b1f60", fontSize: "1rem", lineHeight: 1, padding: "0 2px" }}>
+                                        ✕
+                                    </motion.button>
                                 )}
-                            </motion.button>
-                        );
-                    })}
-                </motion.div>
+                            </motion.div>
+                        </motion.div>
 
-                <AnimatePresence>
-                    {activeTab === "available" && (
-                        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                            style={{ marginBottom: 20 }}>
+                        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.18 }}
+                            style={{ background: "#fff", borderRadius: 16, padding: "6px", display: "flex", gap: 4, marginBottom: 32, border: "1.5px solid #f0ece4", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
+                            {tabs.map(({ key, label, Icon }) => {
+                                const active = activeTab === key;
+                                const showBadge = key === "available" && pubFetched && publicGroups.length > 0;
+                                return (
+                                    <motion.button key={key} onClick={() => handleTabChange(key)} whileTap={{ scale: 0.97 }}
+                                        style={{ flex: 1, border: "none", cursor: "pointer", borderRadius: 12, padding: "12px 10px", background: active ? "#2d3b1f" : "transparent", color: active ? "#fff" : "#2d3b1f99", fontSize: "0.88rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, transition: "background 0.2s, color 0.2s", position: "relative" }}>
+                                        <motion.span whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }} style={{ display: "inline-flex" }}>
+                                            <Icon size={15} strokeWidth={2} />
+                                        </motion.span>
+                                        {label}
+                                        {showBadge && (
+                                            <span style={{ background: active ? "#d4a843" : "#2d3b1f", color: active ? "#2d3b1f" : "#fff", fontSize: "0.65rem", fontWeight: 800, borderRadius: 99, padding: "1px 6px", marginLeft: 2 }}>
+                                                {publicGroups.length}
+                                            </span>
+                                        )}
+                                    </motion.button>
+                                );
+                            })}
+                        </motion.div>
 
-                            {!JSON.parse(localStorage.getItem("user") || "{}").bvn_verified && (
-                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                    style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 14, padding: "12px 16px", marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 10 }}>
-                                    <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚠️</span>
-                                    <p style={{ fontSize: "0.82rem", color: "#8a6a00", lineHeight: 1.55 }}>
-                                        <strong>BVN not verified.</strong> You need to verify your BVN before joining any group.{" "}
-                                        <Link to="/verify-bvn" style={{ color: "#d4a843", fontWeight: 700 }}>Verify now →</Link>
-                                    </p>
+                        <AnimatePresence>
+                            {activeTab === "available" && (
+                                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                                    style={{ marginBottom: 20 }}>
+
+                                    {!JSON.parse(localStorage.getItem("user") || "{}").bvn_verified && (
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                            style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 14, padding: "12px 16px", marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                            <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚠️</span>
+                                            <p style={{ fontSize: "0.82rem", color: "#8a6a00", lineHeight: 1.55 }}>
+                                                <strong>BVN not verified.</strong> You need to verify your BVN before joining any group.{" "}
+                                                <Link to="/verify-bvn" style={{ color: "#d4a843", fontWeight: 700 }}>Verify now →</Link>
+                                            </p>
+                                        </motion.div>
+                                    )}
+
+                                    <div style={{ background: "#f0fff4", border: "1.5px solid #b2dfcc", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                        <Globe size={15} color="#1a7a3a" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
+                                        <p style={{ fontSize: "0.82rem", color: "#1a7a3a", lineHeight: 1.55 }}>
+                                            <strong>Public groups</strong> are open to join requests. Send a request and the group admin will review it.
+                                            Already have an invite code?{" "}
+                                            <MotionLink to="/invite" whileHover={{ color: "#d4a843" }} style={{ color: "#1a7a3a", fontWeight: 700, textDecoration: "underline" }}>Use invite link</MotionLink> to join directly.
+                                        </p>
+                                    </div>
                                 </motion.div>
                             )}
+                        </AnimatePresence>
 
-                            <div style={{ background: "#f0fff4", border: "1.5px solid #b2dfcc", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 10 }}>
-                                <Globe size={15} color="#1a7a3a" strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
-                                <p style={{ fontSize: "0.82rem", color: "#1a7a3a", lineHeight: 1.55 }}>
-                                    <strong>Public groups</strong> are open to join requests. Send a request and the group admin will review it.
-                                    Already have an invite code?{" "}
-                                    <MotionLink to="/invite" whileHover={{ color: "#d4a843" }} style={{ color: "#1a7a3a", fontWeight: 700, textDecoration: "underline" }}>Use invite link</MotionLink> to join directly.
-                                </p>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                        <AnimatePresence mode="wait">
+                            <motion.div key={activeTab + query}
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                transition={{ duration: 0.25 }}
+                                style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
 
-                <AnimatePresence mode="wait">
-                    <motion.div key={activeTab + query}
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-
-                        {(activeTab === "all" || activeTab === "my") && (
-                            <>
-                                {loading && <Spinner />}
-                                {error && !loading && <ErrorState message={error} onRetry={fetchGroups} />}
-                                {!loading && !error && (
-                                    displayGroups.length > 0
-                                        ? displayGroups.map((g, i) => <GroupCard key={g.id} g={g} idx={i} mode="member" />)
-                                        : <EmptyState tab={activeTab} query={query} />
+                                {(activeTab === "all" || activeTab === "my") && (
+                                    <>
+                                        {loading && <Spinner />}
+                                        {error && !loading && <ErrorState message={error} onRetry={fetchGroups} />}
+                                        {!loading && !error && (
+                                            displayGroups.length > 0
+                                                ? displayGroups.map((g, i) => <GroupCard key={g.id} g={g} idx={i} mode="member" />)
+                                                : <EmptyState tab={activeTab} query={query} />
+                                        )}
+                                    </>
                                 )}
-                            </>
-                        )}
 
-                        {activeTab === "available" && (
-                            <>
-                                {pubLoading && <Spinner />}
-                                {pubError && !pubLoading && (
-                                    <ErrorState message={pubError} onRetry={() => { setPubFetched(false); fetchPublicGroups(); }} />
+                                {activeTab === "available" && (
+                                    <>
+                                        {pubLoading && <Spinner />}
+                                        {pubError && !pubLoading && (
+                                            <ErrorState message={pubError} onRetry={() => { setPubFetched(false); fetchPublicGroups(); }} />
+                                        )}
+                                        {!pubLoading && !pubError && (
+                                            displayGroups.length > 0
+                                                ? displayGroups.map((g, i) => (
+                                                    <GroupCard
+                                                        key={g.id}
+                                                        g={g}
+                                                        idx={i}
+                                                        mode="public"
+                                                        onRequestJoin={handleRequestJoin}
+                                                        requestState={requestStates[g.id]}
+                                                    />
+                                                ))
+                                                : <EmptyState tab="available" query={query} />
+                                        )}
+                                    </>
                                 )}
-                                {!pubLoading && !pubError && (
-                                    displayGroups.length > 0
-                                        ? displayGroups.map((g, i) => (
-                                            <GroupCard
-                                                key={g.id}
-                                                g={g}
-                                                idx={i}
-                                                mode="public"
-                                                onRequestJoin={handleRequestJoin}
-                                                requestState={requestStates[g.id]}
-                                            />
-                                        ))
-                                        : <EmptyState tab="available" query={query} />
-                                )}
-                            </>
-                        )}
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-        </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

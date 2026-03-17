@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Coins, Users, Plus, ArrowRight, Clock, Timer, CircleDollarSign, Trophy, RefreshCw, Globe, Lock } from "lucide-react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
 import usePageTitle from "../../hooks/usePageTitle";
+import CoinLoader from "../CoinLoader";
 
 const MotionLink = motion.create(Link);
 
@@ -199,6 +200,7 @@ const EmptyGroups = () => (
 );
 
 const Dashboardpage = () => {
+    const [initLoading, setInitLoading] = useState(true)
     const [currentUser, setCurrentUser] = useState(
         JSON.parse(localStorage.getItem("user") || "{}")
     );
@@ -296,207 +298,215 @@ const Dashboardpage = () => {
     }));
 
     return (
-        <div style={{ minHeight: "100vh", background: "#f5f0e8", position: "relative", overflow: "hidden" }}>
-            {coinSeeds.map((c, i) => <FloatingCoin key={i} {...c} />)}
+        <>
+            <AnimatePresence>
+                {initLoading && <CoinLoader key="loader" onDone={() => setInitLoading(false)} text="loading dashboard..." />}
+            </AnimatePresence>
 
-            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "clamp(32px, 5vw, 64px) clamp(16px, 3vw, 40px) 60px", position: "relative", zIndex: 1 }}>
+            {!initLoading && (
+                <div style={{ minHeight: "100vh", background: "#f5f0e8", position: "relative", overflow: "hidden" }}>
+                    {coinSeeds.map((c, i) => <FloatingCoin key={i} {...c} />)}
 
-                <motion.div initial={{ opacity: 0, y: -24 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ marginBottom: 36, marginTop: 20 }}>
-                    <h1 style={{ fontSize: "clamp(1.7rem,4vw,2.5rem)", fontWeight: 900, color: "#2d3b1f", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontFamily: "'Fraunces',serif" }}>
-                        Welcome back, {firstName}!
-                        <motion.span animate={{ rotate: [0, 20, -10, 20, 0] }} transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
-                            style={{ display: "inline-block" }}>👋</motion.span>
-                    </h1>
-                    <p style={{ fontSize: "0.95rem", color: "#2d3b1f80", marginTop: 8 }}>
-                        {groupsLoading
-                            ? "Loading your savings overview…"
-                            : groups.length > 0
-                                ? `You're part of ${groups.length} group${groups.length !== 1 ? "s" : ""} · Keep it up!`
-                                : "Start your savings journey by creating or joining a group"
-                        }
-                    </p>
-                </motion.div>
+                    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "clamp(32px, 5vw, 64px) clamp(16px, 3vw, 40px) 60px", position: "relative", zIndex: 1 }}>
 
-                {!currentUser.bvn_verified && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 16, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: "1.3rem", flexShrink: 0 }}>⚠️</span>
-                        <div style={{ flex: 1, minWidth: 200 }}>
-                            <p style={{ fontWeight: 700, color: "#8a6a00", fontSize: "0.9rem", marginBottom: 2 }}>
-                                BVN Not Verified
+                        <motion.div initial={{ opacity: 0, y: -24 }} animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                            style={{ marginBottom: 36, marginTop: 20 }}>
+                            <h1 style={{ fontSize: "clamp(1.7rem,4vw,2.5rem)", fontWeight: 900, color: "#2d3b1f", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontFamily: "'Fraunces',serif" }}>
+                                Welcome back, {firstName}!
+                                <motion.span animate={{ rotate: [0, 20, -10, 20, 0] }} transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
+                                    style={{ display: "inline-block" }}>👋</motion.span>
+                            </h1>
+                            <p style={{ fontSize: "0.95rem", color: "#2d3b1f80", marginTop: 8 }}>
+                                {groupsLoading
+                                    ? "Loading your savings overview…"
+                                    : groups.length > 0
+                                        ? `You're part of ${groups.length} group${groups.length !== 1 ? "s" : ""} · Keep it up!`
+                                        : "Start your savings journey by creating or joining a group"
+                                }
                             </p>
-                            <p style={{ fontSize: "0.8rem", color: "#8a6a00" }}>
-                                Verify your BVN to unlock group joining and creation.
-                            </p>
-                        </div>
-                        <MotionLink
-                            to="/verify-bvn"
-                            whileHover={{ scale: 1.03 }}
-                            style={{ background: "#d4a843", color: "#2d3b1f", borderRadius: 10, padding: "8px 16px", fontWeight: 700, fontSize: "0.82rem", textDecoration: "none", flexShrink: 0 }}>
-                            Verify Now →
-                        </MotionLink>
-                    </motion.div>
-                )}
-
-                <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 44 }}>
-                    {groupsLoading
-                        ? [0, 1, 2, 3].map(i => <SkeletonCard key={i} i={i} />)
-                        : statCards.map((s, i) => <StatCard key={i} {...s} i={i} />)
-                    }
-                </div>
-
-                <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
-
-                    <div style={{ flex: "1 1 520px", minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-                        <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-                            <h2 style={{ fontSize: "1.1rem", fontWeight: 800, color: "#2d3b1f", display: "flex", alignItems: "center", gap: 8 }}>
-                                <motion.span whileHover={{ rotate: 20 }} style={{ display: "inline-flex" }}>
-                                    <Users size={19} color="#d4a843" strokeWidth={2} />
-                                </motion.span>
-                                My Active Groups
-                            </h2>
-                            <MotionLink to="/create-group"
-                                whileHover={{ scale: 1.04, backgroundColor: "#1a2c10" }} whileTap={{ scale: 0.95 }}
-                                style={{ background: "#2d3b1f", color: "#fff", borderRadius: 12, padding: "10px 20px", fontSize: "0.87rem", fontWeight: 700, display: "flex", alignItems: "center", gap: 7, boxShadow: "0 4px 16px rgba(45,59,31,0.25)", textDecoration: "none" }}>
-                                <motion.span whileHover={{ rotate: 90 }} transition={{ duration: 0.3 }}>
-                                    <Plus size={15} strokeWidth={2.5} />
-                                </motion.span>
-                                Create Group
-                            </MotionLink>
                         </motion.div>
 
-                        {groupsLoading ? (
-                            [0, 1].map(i => <GroupSkeleton key={i} i={i} />)
-                        ) : groupsError ? (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                style={{ background: "#fff0f0", borderRadius: 16, padding: "24px", textAlign: "center", border: "1.5px solid #ffd0d0" }}>
-                                <p style={{ color: "#e84343", fontWeight: 600, marginBottom: 12 }}>{groupsError}</p>
-                                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={fetchGroups}
-                                    style={{ background: "#2d3b1f", color: "#fff", border: "none", borderRadius: 10, padding: "9px 20px", fontWeight: 700, cursor: "pointer", fontSize: "0.86rem" }}>
-                                    Try Again
-                                </motion.button>
-                            </motion.div>
-                        ) : groups.length === 0 ? (
-                            <EmptyGroups />
-                        ) : (
-                            groups.map((g, i) => (
-                                <GroupCard
-                                    key={g.id}
-                                    g={g}
-                                    i={i}
-                                    myMembership={null}  
-                                />
-                            ))
-                        )}
-
-                        {!groupsLoading && groups.length > 0 && (
-                            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>
-                                <MotionLink to="/groups"
-                                    whileHover={{ backgroundColor: "#ece6da", x: 2 }}
-                                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#fff", border: "1.5px solid #e8e2d8", borderRadius: 16, padding: "15px", fontSize: "0.93rem", fontWeight: 700, color: "#2d3b1f", textDecoration: "none" }}>
-                                    View All Groups
-                                    <motion.span whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
-                                        <ArrowRight size={17} strokeWidth={2.2} />
-                                    </motion.span>
+                        {!currentUser.bvn_verified && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                style={{ background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 16, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                                <span style={{ fontSize: "1.3rem", flexShrink: 0 }}>⚠️</span>
+                                <div style={{ flex: 1, minWidth: 200 }}>
+                                    <p style={{ fontWeight: 700, color: "#8a6a00", fontSize: "0.9rem", marginBottom: 2 }}>
+                                        BVN Not Verified
+                                    </p>
+                                    <p style={{ fontSize: "0.8rem", color: "#8a6a00" }}>
+                                        Verify your BVN to unlock group joining and creation.
+                                    </p>
+                                </div>
+                                <MotionLink
+                                    to="/verify-bvn"
+                                    whileHover={{ scale: 1.03 }}
+                                    style={{ background: "#d4a843", color: "#2d3b1f", borderRadius: 10, padding: "8px 16px", fontWeight: 700, fontSize: "0.82rem", textDecoration: "none", flexShrink: 0 }}>
+                                    Verify Now →
                                 </MotionLink>
                             </motion.div>
                         )}
-                    </div>
 
-                    <div style={{ flex: "0 1 300px", minWidth: 260, display: "flex", flexDirection: "column", gap: 20 }}>
+                        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 44 }}>
+                            {groupsLoading
+                                ? [0, 1, 2, 3].map(i => <SkeletonCard key={i} i={i} />)
+                                : statCards.map((s, i) => <StatCard key={i} {...s} i={i} />)
+                            }
+                        </div>
 
-                        <motion.div initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                            style={{ background: "#fff", borderRadius: 22, padding: "24px 20px", border: "1.5px solid #f0ece4", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                            <h3 style={{ fontSize: "0.97rem", fontWeight: 800, color: "#2d3b1f", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-                                <motion.span whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }}>
-                                    <Clock size={17} color="#d4a843" strokeWidth={2} />
-                                </motion.span>
-                                Recent Activity
-                            </h3>
+                        <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
 
-                            {groupsLoading ? (
-                                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                                    {[0, 1, 2].map(i => (
-                                        <motion.div key={i} animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.2 }}
-                                            style={{ display: "flex", gap: 11 }}>
-                                            <div style={{ width: 38, height: 38, borderRadius: 10, background: "#f0ece4", flexShrink: 0 }} />
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ height: 12, background: "#f0ece4", borderRadius: 6, marginBottom: 6, width: "90%" }} />
-                                                <div style={{ height: 10, background: "#f0ece4", borderRadius: 6, width: "55%" }} />
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            ) : activities.length === 0 ? (
-                                <div style={{ textAlign: "center", padding: "20px 0" }}>
-                                    <Clock size={32} color="#d4a84340" strokeWidth={1.2} style={{ margin: "0 auto 10px" }} />
-                                    <p style={{ fontSize: "0.84rem", color: "#2d3b1f70" }}>No activity yet</p>
-                                    <p style={{ fontSize: "0.75rem", color: "#2d3b1f50", marginTop: 4 }}>Transactions will appear here</p>
-                                </div>
-                            ) : (
-                                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                                    {activities.map(({ Icon, bg, ic, text, time }, i) => (
-                                        <motion.div key={i}
-                                            initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }}
-                                            viewport={{ once: true, amount: 0.5 }}
-                                            transition={{ delay: i * 0.1, duration: 0.45 }}
-                                            style={{ display: "flex", gap: 11 }}>
-                                            <motion.div whileHover={{ rotate: 20, scale: 1.12 }} transition={{ type: "spring", stiffness: 300 }}
-                                                style={{ width: 38, height: 38, borderRadius: 10, background: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                                <Icon size={15} color={ic} strokeWidth={2} />
-                                            </motion.div>
-                                            <div>
-                                                <p style={{ fontSize: "0.81rem", color: "#2d3b1f", fontWeight: 500, lineHeight: 1.55, marginBottom: 3 }}>{text}</p>
-                                                <p style={{ fontSize: "0.73rem", color: "#2d3b1f55" }}>{time}</p>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                    <p style={{ fontSize: "0.72rem", color: "#2d3b1f50", textAlign: "center", paddingTop: 4, borderTop: "1px solid #f4f0ea", marginTop: 4 }}>
-                                        Full transaction history coming soon
-                                    </p>
-                                </div>
-                            )}
-                        </motion.div>
-
-                        <motion.div initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.65, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                            style={{ background: "linear-gradient(150deg, #2d3b1f 0%, #3d5228 55%, #4a6838 100%)", borderRadius: 22, padding: "24px 20px", boxShadow: "0 8px 32px rgba(45,59,31,0.28)", position: "relative", overflow: "hidden" }}>
-                            <motion.div animate={{ rotate: 360 }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                                style={{ position: "absolute", right: -20, top: -20, opacity: 0.06, pointerEvents: "none" }}>
-                                <Coins size={110} color="#d4a843" strokeWidth={0.8} />
-                            </motion.div>
-
-                            <h3 style={{ fontSize: "0.97rem", fontWeight: 800, color: "#fff", marginBottom: 14, position: "relative", zIndex: 1 }}>Quick Actions</h3>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 9, position: "relative", zIndex: 1 }}>
-                                {quickActions.map(({ Icon, label, href }, i) => (
-                                    <MotionLink key={i} to={href}
-                                        initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true, amount: 0.5 }}
-                                        transition={{ delay: 0.1 + i * 0.09, duration: 0.4 }}
-                                        whileHover={{ backgroundColor: "rgba(255,255,255,0.15)", x: 4 }}
-                                        whileTap={{ scale: 0.96 }}
-                                        style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.09)", borderRadius: 12, padding: "13px 15px", color: "#fff", fontSize: "0.88rem", fontWeight: 600, border: "1px solid rgba(255,255,255,0.1)", textDecoration: "none" }}>
-                                        <motion.span whileHover={{ rotate: 360 }} transition={{ duration: 0.5, ease: "easeInOut" }} style={{ display: "inline-flex" }}>
-                                            <Icon size={16} color="#d4a843" strokeWidth={2} />
+                            <div style={{ flex: "1 1 520px", minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+                                <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}
+                                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+                                    <h2 style={{ fontSize: "1.1rem", fontWeight: 800, color: "#2d3b1f", display: "flex", alignItems: "center", gap: 8 }}>
+                                        <motion.span whileHover={{ rotate: 20 }} style={{ display: "inline-flex" }}>
+                                            <Users size={19} color="#d4a843" strokeWidth={2} />
                                         </motion.span>
-                                        {label}
+                                        My Active Groups
+                                    </h2>
+                                    <MotionLink to="/create-group"
+                                        whileHover={{ scale: 1.04, backgroundColor: "#1a2c10" }} whileTap={{ scale: 0.95 }}
+                                        style={{ background: "#2d3b1f", color: "#fff", borderRadius: 12, padding: "10px 20px", fontSize: "0.87rem", fontWeight: 700, display: "flex", alignItems: "center", gap: 7, boxShadow: "0 4px 16px rgba(45,59,31,0.25)", textDecoration: "none" }}>
+                                        <motion.span whileHover={{ rotate: 90 }} transition={{ duration: 0.3 }}>
+                                            <Plus size={15} strokeWidth={2.5} />
+                                        </motion.span>
+                                        Create Group
                                     </MotionLink>
-                                ))}
+                                </motion.div>
+
+                                {groupsLoading ? (
+                                    [0, 1].map(i => <GroupSkeleton key={i} i={i} />)
+                                ) : groupsError ? (
+                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                        style={{ background: "#fff0f0", borderRadius: 16, padding: "24px", textAlign: "center", border: "1.5px solid #ffd0d0" }}>
+                                        <p style={{ color: "#e84343", fontWeight: 600, marginBottom: 12 }}>{groupsError}</p>
+                                        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={fetchGroups}
+                                            style={{ background: "#2d3b1f", color: "#fff", border: "none", borderRadius: 10, padding: "9px 20px", fontWeight: 700, cursor: "pointer", fontSize: "0.86rem" }}>
+                                            Try Again
+                                        </motion.button>
+                                    </motion.div>
+                                ) : groups.length === 0 ? (
+                                    <EmptyGroups />
+                                ) : (
+                                    groups.map((g, i) => (
+                                        <GroupCard
+                                            key={g.id}
+                                            g={g}
+                                            i={i}
+                                            myMembership={null}  
+                                        />
+                                    ))
+                                )}
+
+                                {!groupsLoading && groups.length > 0 && (
+                                    <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>
+                                        <MotionLink to="/groups"
+                                            whileHover={{ backgroundColor: "#ece6da", x: 2 }}
+                                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#fff", border: "1.5px solid #e8e2d8", borderRadius: 16, padding: "15px", fontSize: "0.93rem", fontWeight: 700, color: "#2d3b1f", textDecoration: "none" }}>
+                                            View All Groups
+                                            <motion.span whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
+                                                <ArrowRight size={17} strokeWidth={2.2} />
+                                            </motion.span>
+                                        </MotionLink>
+                                    </motion.div>
+                                )}
                             </div>
-                        </motion.div>
+
+                            <div style={{ flex: "0 1 300px", minWidth: 260, display: "flex", flexDirection: "column", gap: 20 }}>
+
+                                <motion.div initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                                    style={{ background: "#fff", borderRadius: 22, padding: "24px 20px", border: "1.5px solid #f0ece4", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                                    <h3 style={{ fontSize: "0.97rem", fontWeight: 800, color: "#2d3b1f", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
+                                        <motion.span whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }}>
+                                            <Clock size={17} color="#d4a843" strokeWidth={2} />
+                                        </motion.span>
+                                        Recent Activity
+                                    </h3>
+
+                                    {groupsLoading ? (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                                            {[0, 1, 2].map(i => (
+                                                <motion.div key={i} animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.2 }}
+                                                    style={{ display: "flex", gap: 11 }}>
+                                                    <div style={{ width: 38, height: 38, borderRadius: 10, background: "#f0ece4", flexShrink: 0 }} />
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ height: 12, background: "#f0ece4", borderRadius: 6, marginBottom: 6, width: "90%" }} />
+                                                        <div style={{ height: 10, background: "#f0ece4", borderRadius: 6, width: "55%" }} />
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    ) : activities.length === 0 ? (
+                                        <div style={{ textAlign: "center", padding: "20px 0" }}>
+                                            <Clock size={32} color="#d4a84340" strokeWidth={1.2} style={{ margin: "0 auto 10px" }} />
+                                            <p style={{ fontSize: "0.84rem", color: "#2d3b1f70" }}>No activity yet</p>
+                                            <p style={{ fontSize: "0.75rem", color: "#2d3b1f50", marginTop: 4 }}>Transactions will appear here</p>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                                            {activities.map(({ Icon, bg, ic, text, time }, i) => (
+                                                <motion.div key={i}
+                                                    initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }}
+                                                    viewport={{ once: true, amount: 0.5 }}
+                                                    transition={{ delay: i * 0.1, duration: 0.45 }}
+                                                    style={{ display: "flex", gap: 11 }}>
+                                                    <motion.div whileHover={{ rotate: 20, scale: 1.12 }} transition={{ type: "spring", stiffness: 300 }}
+                                                        style={{ width: 38, height: 38, borderRadius: 10, background: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                        <Icon size={15} color={ic} strokeWidth={2} />
+                                                    </motion.div>
+                                                    <div>
+                                                        <p style={{ fontSize: "0.81rem", color: "#2d3b1f", fontWeight: 500, lineHeight: 1.55, marginBottom: 3 }}>{text}</p>
+                                                        <p style={{ fontSize: "0.73rem", color: "#2d3b1f55" }}>{time}</p>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                            <p style={{ fontSize: "0.72rem", color: "#2d3b1f50", textAlign: "center", paddingTop: 4, borderTop: "1px solid #f4f0ea", marginTop: 4 }}>
+                                                Full transaction history coming soon
+                                            </p>
+                                        </div>
+                                    )}
+                                </motion.div>
+
+                                <motion.div initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.65, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                                    style={{ background: "linear-gradient(150deg, #2d3b1f 0%, #3d5228 55%, #4a6838 100%)", borderRadius: 22, padding: "24px 20px", boxShadow: "0 8px 32px rgba(45,59,31,0.28)", position: "relative", overflow: "hidden" }}>
+                                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                                        style={{ position: "absolute", right: -20, top: -20, opacity: 0.06, pointerEvents: "none" }}>
+                                        <Coins size={110} color="#d4a843" strokeWidth={0.8} />
+                                    </motion.div>
+
+                                    <h3 style={{ fontSize: "0.97rem", fontWeight: 800, color: "#fff", marginBottom: 14, position: "relative", zIndex: 1 }}>Quick Actions</h3>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 9, position: "relative", zIndex: 1 }}>
+                                        {quickActions.map(({ Icon, label, href }, i) => (
+                                            <MotionLink key={i} to={href}
+                                                initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
+                                                viewport={{ once: true, amount: 0.5 }}
+                                                transition={{ delay: 0.1 + i * 0.09, duration: 0.4 }}
+                                                whileHover={{ backgroundColor: "rgba(255,255,255,0.15)", x: 4 }}
+                                                whileTap={{ scale: 0.96 }}
+                                                style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.09)", borderRadius: 12, padding: "13px 15px", color: "#fff", fontSize: "0.88rem", fontWeight: 600, border: "1px solid rgba(255,255,255,0.1)", textDecoration: "none" }}>
+                                                <motion.span whileHover={{ rotate: 360 }} transition={{ duration: 0.5, ease: "easeInOut" }} style={{ display: "inline-flex" }}>
+                                                    <Icon size={16} color="#d4a843" strokeWidth={2} />
+                                                </motion.span>
+                                                {label}
+                                            </MotionLink>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            )}
+        </>
     );
 };
 
