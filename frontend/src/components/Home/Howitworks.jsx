@@ -109,8 +109,8 @@ const Howitworks = () => {
 
     return (
         <section
-            ref={ref}
             id='how-it-works'
+            ref={ref}
             style={{
                 background: "#fafaf7",
                 padding: "100px 32px 110px",

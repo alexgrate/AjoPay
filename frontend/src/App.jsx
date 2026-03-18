@@ -16,6 +16,7 @@ import ProfilePage from "./components/Profile/Profilepage";
 import TransactionHistory from "./components/Profile/Transactionhistory";
 import BVNVerification from "./components/Register/BVNVerification";
 
+import AboutPage from "./components/Legal/AboutPage";
 
 import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./components/ErrorPages/NotFound";
@@ -33,6 +34,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgotten-password" element={<ForgotPasswordPage />} />
+        <Route path="/about" element={<AboutPage />} />
 
         <Route element={<ProtectedRoute />} >
           <Route path="/dashboard" element={<Dashboardpage />} />

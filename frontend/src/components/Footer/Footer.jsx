@@ -156,9 +156,22 @@ const Footer = () => {
                                     animate={inView ? { opacity: 1, x: 0 } : {}}
                                     transition={{ delay: 0.25 + colIdx * 0.1 + i * 0.06, duration: 0.45, ease: "easeOut" }}
                                 >
-                                    <Link to={link.href} className='footer-link'>
-                                        {link.label}
-                                    </Link>
+
+                                    {link.href === null ? (
+                                        <span className='footer-link' style={{ opacity: 0.35, cursor: "default" }}>
+                                            {link.label}
+                                            <span style={{ fontSize: "0.62rem", marginLeft: 6, color: "#d4a843", opacity: 0.7 }}>Soon</span>
+                                        </span>
+                                    ) : link.href.startsWith("/") && !link.href.includes("#") ? (
+                                        <Link to={link.href} className='footer-link'>
+                                            {link.label}
+                                        </Link>
+                                    ) : (
+                                        <a href={link.href} className='footer-link'>
+                                            {link.label}
+                                        </a>
+                                    )}
+
                                 </motion.li>
                             ))}
                         </ul>

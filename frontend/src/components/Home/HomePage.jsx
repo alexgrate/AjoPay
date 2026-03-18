@@ -21,7 +21,7 @@ const HomePage = () => {
 
             {!initLoading && (
                 <>
-                    <HeroSection />
+                    <HeroSection  />
                     <Howitworks />
                     <CommunityStories />
                     <Ctasection />
