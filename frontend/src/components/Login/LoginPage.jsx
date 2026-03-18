@@ -88,16 +88,27 @@ const LoginPage = () => {
 
             navigate("/dashboard")
         } catch (err) {
-            if (err.response?.data) {
+            if (err.response) {
                 const data = err.response.data
 
-                setError(
-                    data.error ||
-                    data.non_field_errors?.[0] ||
-                    data.email?.[0] ||
-                    data.detail ||
-                    "Invalid email or password"
-                )
+                if (err.response.status === 401 || err.response.status === 400) {
+                    setError(
+                        data.error ||
+                        data.non_field_errors?.[0] ||
+                        data.detail ||
+                        data.email?.[0] ||
+                        data.password?.[0] ||
+                        "Invalid email or password, Please try again."
+                    )
+                } else if (err.response.status === 429) {
+                    setError("Too many attempts. Please wait a moment and try again.")
+                } else if (err.response.status >= 500) {
+                    setError("Server error. Please try again in a moment.")
+                } else {
+                    setError("Invalid email or password. Please try again.")
+                }    
+            } else if (err.request) {
+                setError("Network error. Check your connection and try again.")
             } else {
                 setError("Something went wrong. Please try again.")
             }
@@ -190,7 +201,7 @@ const LoginPage = () => {
                         type="text"
                         placeholder="Email Address"
                         value={email}
-                        onChange={e =>{ setEmail(e.target.value); setError(" "); }}
+                        onChange={e =>{ setEmail(e.target.value); setError(""); }}
                         onFocus={() => setEmailFocused(true)}
                         onBlur={() => setEmailFocused(false)}
                     />
