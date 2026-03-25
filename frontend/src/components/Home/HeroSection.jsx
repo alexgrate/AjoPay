@@ -428,7 +428,7 @@ const HeroSection = () => {
                             marginBottom: 36
                         }}
                     >
-                        Join trusted Ajo groups, contribute monthly, and recieve your payout automatically. No stress, pure celebration.
+                        Join trusted Ajo groups, contribute monthly, and receive your payout automatically. No stress, pure celebration.
                     </motion.p>
 
                     <motion.div

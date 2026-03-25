@@ -39,7 +39,7 @@ AxiosInstance.interceptors.response.use(
                     return Promise.reject(error)
                 }
 
-                const response = await axios.post(`${baseUrl}/token/refresh/`, {
+                const response = await axios.post(`${baseUrl}api/accounts/token/refresh/`, {
                     refresh: refreshToken,
                 })
 

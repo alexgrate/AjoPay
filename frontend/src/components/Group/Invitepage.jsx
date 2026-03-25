@@ -300,6 +300,16 @@ const GroupPreviewScreen = ({ group, inviteCode, onJoined }) => {
                     )}
                 </AnimatePresence>
 
+                {!joined && !group.is_full && !JSON.parse(localStorage.getItem("user") || "{}").bvn_verified && (
+                    <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+                        style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 10, padding: "10px 14px", marginBottom: 12 }}>
+                        <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚠️</span>
+                        <p style={{ fontSize: "0.8rem", color: "#8a6a00", lineHeight: 1.55 }}>
+                            <strong>BVN not verified.</strong> Verify your BVN from your profile before joining any group.
+                        </p>
+                    </motion.div>
+                )}
+
                 <AnimatePresence mode="wait">
                     {joined ? (
                         <motion.div key="joined"
@@ -341,16 +351,6 @@ const GroupPreviewScreen = ({ group, inviteCode, onJoined }) => {
                         </motion.button>
                     )}
                 </AnimatePresence>
-
-                {!joined && !group.is_full && !JSON.parse(localStorage.getItem("user") || "{}").bvn_verified && (
-                    <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
-                        style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "#fffbe8", border: "1.5px solid #f5e090", borderRadius: 10, padding: "10px 14px", marginBottom: 12 }}>
-                        <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚠️</span>
-                        <p style={{ fontSize: "0.8rem", color: "#8a6a00", lineHeight: 1.55 }}>
-                            <strong>BVN not verified.</strong> Verify your BVN from your profile before joining any group.
-                        </p>
-                    </motion.div>
-                )}
                 
                 {!joined && !group.is_full && (
                     <p style={{ textAlign: "center", fontSize: "0.78rem", color: "#2d3b1f60", marginTop: 12 }}>

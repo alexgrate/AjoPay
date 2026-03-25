@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Coins, Home, ArrowLeft } from "lucide-react";
 import usePageTitle from "../../hooks/usePageTitle";
 
@@ -24,6 +24,7 @@ const FloatCoin = ({ x, size, delay, dur }) => (
 
 export default function NotFound() {
     usePageTitle("Page Not Found");
+    const navigate = useNavigate()
 
     return (
         <div style={{ minHeight: "100vh", background: "#f5f0e8", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, position: "relative", overflow: "hidden" }}>
@@ -69,7 +70,7 @@ export default function NotFound() {
                     style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
                     <motion.button
                         whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                        onClick={() => window.history.back()}
+                        onClick={() => navigate(-1)}
                         style={{ display: "flex", alignItems: "center", gap: 7, background: "#f0ece4", color: "#2d3b1f", border: "none", borderRadius: 13, padding: "13px 22px", fontWeight: 700, fontSize: "0.92rem", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
                         <ArrowLeft size={16} strokeWidth={2.5} />Go Back
                     </motion.button>

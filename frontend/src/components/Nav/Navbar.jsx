@@ -210,9 +210,7 @@ const Navbar = () => {
     useEffect(() => { setMobileOpen(false); setAvatarOpen(false) },
 [location.pathname])
 
-    const initials = currentUser ? getInitials(currentUser.full_name || `${currentUser.first_name || ""}
-        ${currentUser.last_name || ""}`)
-        : ""
+    const initials = currentUser ? getInitials(currentUser.full_name || `${currentUser.first_name || ""} ${currentUser.last_name || ""}`.trim()) : ""
 
     return (
         <motion.nav

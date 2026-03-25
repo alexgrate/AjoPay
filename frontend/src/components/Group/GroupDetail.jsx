@@ -60,7 +60,7 @@ const timeAgo = (d) => {
     return `${Math.floor(hrs / 24)}d ago`;
 };
 
-const CircleViz = ({ members = [] }) => {
+const CircleViz = ({ members = [], activeCycle = null }) => {
     const SIZE = 360;
     const cx = SIZE / 2, cy = SIZE / 2, R = 130;
     const nodeColors = { received: "#1db893", current: "#d4a843", upnext: "#7c5cbf", awaiting: "#d0ccc4" };
@@ -68,7 +68,11 @@ const CircleViz = ({ members = [] }) => {
     const vizMembers = members.map((m, i) => ({
         ...m,
         initials: getInitials(m.full_name),
-        status:   i === 0 ? "current" : "awaiting",
+        status: m.has_received_payout
+            ? "received"
+            : activeCycle?.recipient_name === m.full_name
+                ? "current"
+                : "awaiting",
     }));
 
     const nodes = vizMembers.map((m, i) => {
@@ -1300,7 +1304,7 @@ const GroupDetail = () => {
                                     </h3>
                                     <span style={{ fontSize: "0.76rem", fontWeight: 600, color: "#2d3b1f80", background: "#f4f0ea", borderRadius: 99, padding: "4px 12px" }}>{group.member_count} Members</span>
                                 </div>
-                                <CircleViz members={members} />
+                                <CircleViz members={members} activeCycle={activeCycle} />
                                 <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 14, flexWrap: "wrap" }}>
                                     {[{ c: "#1db893", l: "Received" }, { c: "#d4a843", l: "Current" }, { c: "#7c5cbf", l: "Upcoming" }, { c: "#d0ccc4", l: "Pending" }].map(({ c, l }, i) => (
                                         <span key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.76rem", color: "#2d3b1f80" }}>

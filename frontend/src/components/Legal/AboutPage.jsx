@@ -3,6 +3,9 @@ import { motion, useInView } from "framer-motion";
 import { Coins, Users, ArrowRight, Star, CheckCircle } from "lucide-react";
 import usePageTitle from "../../hooks/usePageTitle";
 import { team, stats, values, timeline } from "../../context";
+import { Link } from "react-router-dom";
+
+const MotionLink = motion.create(Link);
 
 const FLOATS = [
     { x: "3%",  s: 18, d: 0,   dr: 5.2 },
@@ -210,13 +213,13 @@ const AboutPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
                         style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                        <motion.a
+                        <MotionLink
                             href="/register"
                             whileHover={{ scale: 1.04, backgroundColor: "#c49a35" }}
                             whileTap={{ scale: 0.97 }}
                             style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#d4a843", color: "#2d3b1f", borderRadius: 13, padding: "14px 26px", fontWeight: 700, fontSize: "0.95rem", textDecoration: "none", boxShadow: "0 4px 20px rgba(212,168,67,0.4)" }}>
                             Start Saving Today <ArrowRight size={16} strokeWidth={2.5} />
-                        </motion.a>
+                        </MotionLink>
                         <motion.a
                             href="/#how-it-works"
                             whileHover={{ backgroundColor: "rgba(255,255,255,0.15)" }}
@@ -510,14 +513,14 @@ const AboutPage = () => {
                             </motion.p>
                             <motion.div initial={{ opacity: 0, y: 16 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.3 }}
                                 style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-                                <motion.a href="/register" whileHover={{ scale: 1.04, backgroundColor: "#c49a35" }} whileTap={{ scale: 0.97 }}
+                                <MotionLink href="/register" whileHover={{ scale: 1.04, backgroundColor: "#c49a35" }} whileTap={{ scale: 0.97 }}
                                     style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#d4a843", color: "#2d3b1f", borderRadius: 13, padding: "15px 30px", fontWeight: 700, fontSize: "1rem", textDecoration: "none", boxShadow: "0 6px 24px rgba(212,168,67,0.4)" }}>
                                     Create Free Account <ArrowRight size={17} strokeWidth={2.5} />
-                                </motion.a>
-                                <motion.a href="/invite" whileHover={{ backgroundColor: "rgba(255,255,255,0.12)" }}
+                                </MotionLink>
+                                <MotionLink href="/invite" whileHover={{ backgroundColor: "rgba(255,255,255,0.12)" }}
                                     style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", color: "#fff", borderRadius: 13, padding: "15px 30px", fontWeight: 700, fontSize: "1rem", textDecoration: "none", border: "1.5px solid rgba(255,255,255,0.15)" }}>
                                     Join with Invite Code
-                                </motion.a>
+                                </MotionLink>
                             </motion.div>
                         </div>
                     </>

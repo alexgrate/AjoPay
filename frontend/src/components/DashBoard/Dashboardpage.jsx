@@ -244,7 +244,7 @@ const Dashboardpage = () => {
     const activeGroups  = groups.filter(g => g.status === "active").length;
     const pendingGroups = groups.filter(g => g.status === "pending").length;
     const adminGroups   = groups.filter(g => {
-        return g.creator === currentUser.id;
+        return Number(g.creator) === Number(currentUser.id);
     }).length;
 
     const statCards = [
@@ -399,7 +399,7 @@ const Dashboardpage = () => {
                                             key={g.id}
                                             g={g}
                                             i={i}
-                                            myMembership={null}  
+                                            myMembership={g.members?.find(m => m.user_id === Number(currentUser.id)) ?? null}
                                         />
                                     ))
                                 )}

@@ -10,7 +10,7 @@ import CoinLoader from '../CoinLoader';
 
 
 const HomePage = () => {
-    usePageTitle("Home Page")
+    usePageTitle("AjoPay - Save Together")
     const [initLoading, setInitLoading] = useState(true);
 
     return (

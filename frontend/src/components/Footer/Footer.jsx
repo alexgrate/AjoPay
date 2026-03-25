@@ -135,7 +135,7 @@ const Footer = () => {
                 {Object.entries(footerLinks).map(([title, links], colIdx) => (
                     <motion.div
                         key={title}
-                        {...fadeUp(0.12 *colIdx * 0.1)}
+                        {...fadeUp(0.1 + colIdx * 0.12)}
                         style={{ flex: "1 1 140px" }}
                     >
                         <p className='footer-col-title'>{title}</p>

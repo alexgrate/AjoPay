@@ -268,8 +268,8 @@ const LoginPage = () => {
                     <motion.button
                         onClick={handleLogin}
                         disabled={loading}
-                        whileHover={loading ? { scale: 1.02, backgroundColor: "#c49a35" } : {}}
-                        whileTap={loading ? { scale: 0.97 } : {}}
+                        whileHover={!loading ? { scale: 1.02, backgroundColor: "#c49a35" } : {}}
+                        whileTap={!loading ? { scale: 0.97 } : {}}
                         style={{
                             width: "100%",
                             background: loading ? "#e8c87a" : "#d4a843",

@@ -172,7 +172,6 @@ export default function CreateGroup() {
     const [amount,      setAmount]      = useState("");
     const [frequency,   setFrequency]   = useState("monthly");
     const [startDate,   setStartDate]   = useState("");
-    const [payoutOrder, setPayoutOrder] = useState("sequential");
 
     const [loading,      setLoading]      = useState(false);
     const [errors,       setErrors]       = useState({});
@@ -356,7 +355,6 @@ export default function CreateGroup() {
                                                 ["Contribution",  createdGroup ? `₦${Number(createdGroup.contribution_amount).toLocaleString()} / ${createdGroup.frequency}` : "—", false],
                                                 ["Total Payout",  createdGroup ? `₦${Number(createdGroup.total_pool).toLocaleString()}` : "—",                             true ],
                                                 ["Start Date",    createdGroup?.start_date || "—",                                                                         false],
-                                                ["Payout Order",  payoutOrder,                                                                                             false],
                                             ].map(([k, v, gold], i) => (
                                                 <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: i < 6 ? "1px solid rgba(45,59,31,0.07)" : "none" }}>
                                                     <span style={{ fontSize: "0.84rem", color: "#2d3b1f70" }}>{k}:</span>

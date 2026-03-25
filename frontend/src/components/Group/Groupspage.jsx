@@ -280,13 +280,13 @@ const Groupspage = () => {
         }
     }, []);
 
-    useEffect(() => { fetchGroups(); }, []);
+    useEffect(() => { fetchGroups(); }, [fetchGroups]);
 
     useEffect(() => {
         if (activeTab === "available" && !pubFetched) {
             fetchPublicGroups();
         }
-    }, [activeTab]);
+    }, [activeTab, fetchPublicGroups, pubFetched]);
 
     const handleRequestJoin = async (groupId) => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -334,7 +334,7 @@ const Groupspage = () => {
 
     const displayGroups = (() => {
         if (activeTab === "available") return applyQuery(publicGroups);
-        if (activeTab === "my")        return applyQuery(groups.filter(g => g.creator === currentUser.id));
+        if (activeTab === "my") return applyQuery(groups);
         return applyQuery(groups);   // "all"
     })();
 

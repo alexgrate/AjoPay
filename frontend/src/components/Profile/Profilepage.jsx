@@ -315,7 +315,6 @@ export default function ProfilePage() {
     const [accVerified, setAccVerified] = useState(false);
     const [resolving,   setResolving]   = useState(false);
     const [resolveError,setResolveError]= useState("");
-    const [banks,       setBanks]       = useState([]);
 
     
     usePageTitle("Profile");
@@ -359,7 +358,7 @@ export default function ProfilePage() {
     const [stats, setStats] = useState({
         groupsJoined: 0,
         totalSaved: 0,
-        payoutsRecieved: 0,
+        payoutsReceived: 0,
         contributionsThisMonth: 0,
         groupsActive: 0,
     })
@@ -375,7 +374,7 @@ export default function ProfilePage() {
                 const activeGroups = groups.filter(g => g.status === "active")
 
                 let totalSaved = 0
-                let payoutsRecieved = 0
+                let payoutsReceived = 0
                 let contribsThisMonth = 0
 
                 const now = new Date()
@@ -608,7 +607,7 @@ export default function ProfilePage() {
                     <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
                         <StatCard value={stats.groupsJoined} label="Groups Joined" bg="linear-gradient(135deg,#1db893,#0fa87a)" icon={<Users size={64} color="#fff" />} delay={0.08} />
                         <StatCard value={`₦${Number(stats.totalSaved).toLocaleString()}`} label="Total Saved" bg="linear-gradient(135deg,#d4a843,#e8c055)" icon={<CircleDollarSign size={64} color="#fff" />} delay={0.15} />
-                        <StatCard value={stats.payoutsRecieved} label="Payouts Received" bg="#fff" textColor="#2d3b1f" icon={<PartyPopper size={64} color="#2d3b1f" />} delay={0.22} />
+                        <StatCard value={stats.payoutsReceived} label="Payouts Received" bg="#fff" textColor="#2d3b1f" icon={<PartyPopper size={64} color="#2d3b1f" />} delay={0.22} />
                         <StatCard value={user?.trust_score ?? 0} label={user?.trust_tier?.label || "New Member"} bg="linear-gradient(135deg,#5b6ef5,#8b5cf6)" icon={<Star size={64} color="#fff" />} delay={0.29} />
                     </div>
 
@@ -959,8 +958,8 @@ export default function ProfilePage() {
                                         {
                                             icon:  "💎",
                                             title: "Consistent Saver",
-                                            sub:   stats.payoutsRecieved > 0 ? `Received ${stats.payoutsReceived} payout${stats.payoutsReceived !== 1 ? "s" : ""}` : "Complete a cycle to unlock",
-                                            gold:  stats.payoutsRecieved > 0,
+                                            sub:   stats.payoutsReceived > 0 ? `Received ${stats.payoutsReceived} payout${stats.payoutsReceived !== 1 ? "s" : ""}` : "Complete a cycle to unlock",
+                                            gold:  stats.payoutsReceived > 0,
                                         },
                                         {
                                             icon: "🏦",
@@ -1011,7 +1010,7 @@ export default function ProfilePage() {
                                 {[
                                     { icon: "💸", label: "Contributions Made", val: stats.contributionsThisMonth > 0 ? `${stats.contributionsThisMonth}` : "-" },
                                     { icon: "📈", label: "Total Saved",     val: stats.totalSaved > 0 ? `₦${Number(stats.totalSaved).toLocaleString()}` : "-" },
-                                    { icon: "🎯", label: "Payouts Recieved",     val: stats.payoutsRecieved > 0 ? stats.payoutsRecieved : "-" },
+                                    { icon: "🎯", label: "Payouts Received",     val: stats.payoutsReceived > 0 ? stats.payoutsReceived : "-" },
                                     { icon: "🤝", label: "Groups Active",      val: stats.groupsActive > 0 ? stats.groupsActive : "-" },
                                 ].map(({ icon, label, val }, i) => (
                                     <motion.div key={i} initial={{ opacity: 0, x: 8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
