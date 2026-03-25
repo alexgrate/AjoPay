@@ -61,11 +61,6 @@ INSTALLED_APPS = [
 PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY")
 PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY")
 
-# INTERSWITCH
-INTERSWITCH_CLIENT_ID = config("INTERSWITCH_CLIENT_ID")
-INTERSWITCH_CLIENT_SECRET = config("INTERSWITCH_CLIENT_SECRET")
-INTERSWITCH_BASE_URL = "https://sandbox.interswitchng.com"
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
