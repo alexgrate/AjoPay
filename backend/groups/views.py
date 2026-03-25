@@ -104,10 +104,24 @@ class GroupViewset(viewsets.ViewSet):
                 {"error": "Please verify your BVN before joining a group"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-
         if request.user.is_blacklisted:
             return Response(
                 {"error": "Your account has been blacklisted"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if request.user.credit_score is not None and request.user.credit_score < 40:
+            return Response(
+                {"error": "Your credit score is too low to join any group"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if group.is_public and request.user.credit_score is not None and request.user.credit_score < 60:
+            return Response(
+                {
+                    "error": "Your credit score is too low to join public groups",
+                    "credit_score": request.user.credit_score,
+                    "required": 60,
+                    "suggestion": "Join a private group with an invite code instead",
+                },
                 status=status.HTTP_403_FORBIDDEN
             )
         if Membership.objects.filter(group=group, user=request.user).exists():
@@ -325,6 +339,11 @@ class GroupViewset(viewsets.ViewSet):
         if group.creator == request.user:
             return Response(
                 {"error": "Group creator cannot leave. Delete the group instead."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if group.status == "active":
+            return Response(
+                {"error": "You cannot leave a group while a cycle is active. Wait for the current cycle to complete."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         membership.delete()

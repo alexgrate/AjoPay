@@ -5,7 +5,6 @@ import uuid
 
 class PaymentReference(models.Model):
     PAYMENT_TYPE_CHOICES = [
-        ("deposit",      "Security Deposit"),
         ("contribution", "Cycle Contribution"),
     ]
 
@@ -25,12 +24,7 @@ class PaymentReference(models.Model):
     amount       = models.DecimalField(max_digits=12, decimal_places=2)
     status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
 
-    membership   = models.ForeignKey(
-        "groups.Membership",
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name="payment_references"
-    )
+
     contribution = models.ForeignKey(
         "groups.Contribution",
         on_delete=models.SET_NULL,

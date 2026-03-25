@@ -3,7 +3,6 @@ from django.conf import settings
 from django.utils import timezone
 import uuid
 
-
 class Group(models.Model):
 
     STATUS_CHOICES = [
@@ -170,10 +169,9 @@ class Cycle(models.Model):
 class Contribution(models.Model):
 
     STATUS_CHOICES = [
-        ("pending",            "Pending"),
-        ("paid",               "Paid"),
-        ("defaulted",          "Defaulted"),
-        ("covered_by_deposit", "Covered by Deposit"),
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+        ("defaulted", "Defaulted"),
     ]
 
     cycle        = models.ForeignKey(Cycle, on_delete=models.CASCADE, related_name="contributions")

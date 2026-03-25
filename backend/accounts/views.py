@@ -60,9 +60,8 @@ class LoginViewset(viewsets.ViewSet):
             )
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)
     
-
 class LogoutViewset(viewsets.ViewSet):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request):
         try:

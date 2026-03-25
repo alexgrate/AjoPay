@@ -16,62 +16,6 @@ from .models import PaymentReference
 from .paystack import initialize_transaction, verify_transaction
 
 
-class InitializeDepositView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, membership_id):
-        membership = Membership.objects.filter(
-            id=membership_id, user=request.user
-        ).select_related("group", "user").first()
-
-        if not membership:
-            return Response(
-                {"error": "Membership not found"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        if membership.deposit_paid:
-            return Response(
-                {"error": "Deposit already paid"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        amount   = membership.group.contribution_amount
-        callback = request.data.get("callback_url", "")
-
-        pay_ref = PaymentReference.objects.create(
-            user         = request.user,
-            payment_type = "deposit",
-            amount       = amount,
-            membership   = membership,
-        )
-
-        result = initialize_transaction(
-            email        = request.user.email,
-            amount_naira = float(amount),
-            reference    = str(pay_ref.reference),
-            metadata     = {
-                "payment_type":  "deposit",
-                "membership_id": membership.id,
-                "group_id":      membership.group.id,
-                "group_name":    membership.group.name,
-                "user_id":       request.user.id,
-            },
-            callback_url = callback,
-        )
-
-        if not result.get("status"):
-            return Response(
-                {"error": "Could not initialize payment", "detail": result},
-                status=status.HTTP_502_BAD_GATEWAY
-            )
-
-        return Response({
-            "authorization_url": result["data"]["authorization_url"],
-            "reference":         str(pay_ref.reference),
-            "amount":            amount,
-        })
-
-
 class InitializeContributionView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -99,7 +43,6 @@ class InitializeContributionView(APIView):
             user         = request.user,
             payment_type = "contribution",
             amount       = contribution.amount,
-            membership   = contribution.member,
             contribution = contribution,
         )
 
@@ -164,9 +107,7 @@ class VerifyPaymentView(APIView):
         pay_ref.paystack_ref = result["data"]["reference"]
         pay_ref.save()
 
-        if pay_ref.payment_type == "deposit":
-            _handle_deposit_success(pay_ref)
-        elif pay_ref.payment_type == "contribution":
+        if pay_ref.payment_type == "contribution":
             _handle_contribution_success(pay_ref)
 
         return Response({"message": "Payment verified successfully", "status": "success"})
@@ -202,9 +143,8 @@ class PaystackWebhookView(APIView):
                 pay_ref.paystack_ref = data.get("reference", "")
                 pay_ref.save()
 
-                if pay_ref.payment_type == "deposit":
-                    _handle_deposit_success(pay_ref)
-                elif pay_ref.payment_type == "contribution":
+
+                if pay_ref.payment_type == "contribution":
                     _handle_contribution_success(pay_ref)
 
         elif event_type == "transfer.success":
@@ -215,29 +155,12 @@ class PaystackWebhookView(APIView):
 
         return Response(status=status.HTTP_200_OK)
 
-
-def _handle_deposit_success(pay_ref):
-    membership = pay_ref.membership
-    if not membership:
-        return
-
-    membership.deposit_paid   = True
-    membership.deposit_amount = pay_ref.amount
-    membership.save()
-
-    DepositTransaction.objects.update_or_create(
-        membership = membership,
-        defaults   = {
-            "amount":      pay_ref.amount,
-            "status":      "paid",
-            "paystack_ref": pay_ref.paystack_ref,
-            "paid_at":     timezone.now(),
-        }
-    )
-
 def _handle_contribution_success(pay_ref):
     contribution = pay_ref.contribution
     if not contribution:
+        return
+    
+    if contribution.status == "paid":
         return
 
     contribution.status       = "paid"
